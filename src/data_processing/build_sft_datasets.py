@@ -110,7 +110,7 @@ def create_exercise_bank(output_path: Path):
             "difficulty": "intermediate",
             "type": "conceptual",
             "question": "For next-token generation with sorted token probabilities: ['catches': 0.45, 'throws': 0.30, 'chases': 0.10, 'bites': 0.03, 'eats': 0.02, 'sleeps': 0.019, 'hates': 0.015, 'takes': 0.001]:\n1. Which token is picked by greedy decoding?\n2. Which tokens are in the candidate set for top-k with k=3?\n3. Which tokens are retained by nucleus (top-p) sampling with p=0.92?",
-            "correct_answer": "1. 'catches'\n2. ['catches', 'throws', 'chases']\n3. ['catches', 'throws', 'chases', 'bites', 'eats']",
+            "correct_answer": "1. 'catches'\n2. ['catches', 'throws', 'chases']\n3. ['catches', 'throws', 'chases', 'bites', 'eats', 'sleeps', 'hates']",
             "points": 2.5,
             "explanation": "1. Greedy selects $\\arg\\max P(w)$, which is 'catches' (0.45).\n2. Top-k with $k=3$ retains the top 3 highest probability tokens: 'catches' (0.45), 'throws' (0.30), 'chases' (0.10).\n3. Top-p (nucleus) finds the smallest set of tokens whose cumulative probability $\\ge 0.92$:\n- catches (0.45) -> cum = 0.45\n- throws (0.30) -> cum = 0.75\n- chases (0.10) -> cum = 0.85\n- bites (0.03) -> cum = 0.88\n- eats (0.02) -> cum = 0.90\n- sleeps (0.019) -> cum = 0.919 (< 0.92)\n- hates (0.015) -> cum = 0.934 (>= 0.92)\nThus candidates retained: catches, throws, chases, bites, eats, sleeps, hates."
         },
