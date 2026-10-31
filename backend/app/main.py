@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from backend.app.core.config import settings
-from backend.app.api import tutor, quiz, evaluator, sandbox, knowledge
+from backend.app.api import tutor, quiz, evaluator, sandbox, knowledge, learner
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -32,6 +32,7 @@ app.include_router(quiz.router, prefix=settings.API_PREFIX)
 app.include_router(evaluator.router, prefix=settings.API_PREFIX)
 app.include_router(sandbox.router, prefix=settings.API_PREFIX)
 app.include_router(knowledge.router, prefix=settings.API_PREFIX)
+app.include_router(learner.router, prefix=settings.API_PREFIX)
 
 @app.get("/health")
 async def health():

@@ -13,10 +13,12 @@ from src.evaluator.coding_tasks.task_02_attention import STARTER_CODE as ATTN_ST
 from src.evaluator.coding_tasks.task_03_perplexity import STARTER_CODE as PERP_STARTER
 from src.models.prompts import CODE_DEBUGGER_SYSTEM_PROMPT
 from backend.app.core.config import settings
+from src.learner.mastery import LearnerEngine
 
 router = APIRouter(prefix="/sandbox", tags=["Sandbox"])
 
 runner = CodeSandboxRunner(timeout_seconds=6.0)
+engine = LearnerEngine()
 
 TASK_METADATA = {
     "task_01_bpe": {
@@ -51,6 +53,7 @@ class RunCodeRequest(BaseModel):
     code: str
     request_ai_diagnosis: bool = True
     model: Optional[str] = None
+    student_id: Optional[str] = "default_student"
 
 
 @router.get("/tasks")
@@ -107,9 +110,23 @@ async def run_code(req: RunCodeRequest):
             except Exception as ex:
                 ai_diagnosis = f"Could not generate AI diagnostic hint: {str(ex)}"
                 
+        # Update student mastery in SQLite
+        mastery_update = None
+        try:
+            mastery_update = engine.update_from_code_run(
+                student_id=req.student_id or "default_student",
+                task_id=req.task_id,
+                passed_tests=run_res.get("passed", 0),
+                total_tests=run_res.get("total", 0),
+                is_success=run_res.get("success", False)
+            )
+        except Exception:
+            pass
+
         return {
             "execution": run_res,
-            "ai_diagnosis": ai_diagnosis
+            "ai_diagnosis": ai_diagnosis,
+            "mastery_update": mastery_update
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

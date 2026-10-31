@@ -57,3 +57,5 @@ Thumbs.db
 # Project specific
 data/test_chroma/
 data/chroma_db/
+*.db
+data/*.db
