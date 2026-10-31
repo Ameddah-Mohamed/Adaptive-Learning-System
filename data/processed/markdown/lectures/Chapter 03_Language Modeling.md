@@ -570,56 +570,27 @@ other LM.
 • Use perplexity instead of raw probability
 • Probability depends on the size of the test set
 • Probability gets smaller the longer the text
-• Better to have a metric that is per-word,
-normalized by length.  we could compare
-across texts of different lengths.
-• Perplexity is the inverse probability of the test set,
-normalized by the number of words
-Intuition of perplexity
-N
-N
-NN
-wwwP
-wwwPWPP
-)...(
-1
-)...()(
-21
-1
-21
-
-
-
+• Better to have a metric that is per-word, normalized by length so we can compare across texts of different lengths.
+• Perplexity is the inverse probability of the test set, normalized by the number of words $N$:
+
+$$PP(W) = P(w_1, w_2, \dots, w_N)^{-\frac{1}{N}} = \sqrt[N]{\frac{1}{P(w_1, w_2, \dots, w_N)}}$$
+
+Using the chain rule:
+$$PP(W) = \left[ \prod_{i=1}^N P(w_i \mid w_1, \dots, w_{i-1}) \right]^{-\frac{1}{N}}$$
+
 36
 
 ---
 
 ## Slide / Page 37
 
-• Perplexity is one of the most important metrics in NLP,
-used for evaluating large language models as well as n-
-gram models.
-• Perplexity is the inverse probability of the test set,
-normalized by the number of words (or tokens).
-• Probability range is  [0,1], perplexity range is [1,∞]
-• The higher the probability of the word sequence,
-the lower the perplexity. Minimizing perplexity
-amounts to maximizing the test set probability
-Intuition of perplexity
-N
-N
-NN
-wwwP
-wwwPWPP
-)...(
-1
-)...()(
-21
-1
-21
-
-
-
+• Perplexity is one of the most important metrics in NLP, used for evaluating large language models as well as n-gram models.
+• Perplexity is the inverse probability of the test set, normalized by the number of words (or tokens).
+• Probability range is $[0, 1]$, perplexity range is $[1, \infty]$.
+• The higher the probability of the word sequence, the lower the perplexity. Minimizing perplexity amounts to maximizing the test set probability:
+
+$$\ln PP(W) = -\frac{1}{N} \sum_{i=1}^N \ln P(w_i \mid w_{<i}) = \mathcal{L}_{CE} \implies PP(W) = e^{\mathcal{L}_{CE}}$$
+
 37
 
 ---

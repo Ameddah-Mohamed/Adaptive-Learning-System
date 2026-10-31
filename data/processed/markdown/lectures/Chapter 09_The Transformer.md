@@ -480,26 +480,19 @@ the Value vector.
 
 ## Slide / Page 29
 
-Learning the weight matrices WQ, WK, WV
-3. Attention Calculation:   For each Query Qi ​, we compute the
-attention scores by measuring the similarity between Qi and the
-Keys of all tokens (including its own).
- This is usually done using the dot product (often scaled by the square root
-of the dimension of the key vectors):
-𝑨𝐭𝐭𝐞𝐧𝐭𝐢𝐨𝐧 𝐒𝐜𝐨𝐫𝐞 𝐢, 𝐣 =
-𝑸𝒊 ⋅ 𝑲𝒋
-𝒅𝒌
-where dk​ is the dimension of the Key vector.
-• These scores are then passed through a softmax function giving:
-𝑨𝐭𝐭𝐞𝐧𝐭𝐢𝐨𝐧 𝐖𝐞𝐢𝐠𝐡𝐭𝐬 𝐢, 𝐣 = 𝒔𝒐𝒇𝒕𝒎𝒂𝒙(
-𝑸𝒊 ⋅ 𝑲𝒋
-𝒅𝒌
-)
-• Finally, the Value vectors are weighted by these attention scores
-to compute the output for the Query Qi​:
-𝑨𝐭𝐭𝐞𝐧𝐭𝐢𝐨𝐧 𝐖𝐞𝐢𝐠𝐡𝐭𝐬 𝐢 = ෍
-𝒋
-𝑨𝐭𝐭𝐞𝐧𝐭𝐢𝐨𝐧 𝐖𝐞𝐢𝐠𝐡𝐭𝐬 𝐢, 𝐣 ⋅ 𝑽𝒋
+Learning the weight matrices $W^Q$, $W^K$, $W^V$
+
+3. Attention Calculation: For each Query $Q_i$, we compute the attention scores by measuring the similarity between $Q_i$ and the Keys of all tokens (including its own).
+- This is done using the dot product scaled by the square root of the dimension of the key vectors $d_k$:
+$$\text{Attention Score}(i, j) = \frac{Q_i \cdot K_j}{\sqrt{d_k}}$$
+where $d_k$ is the dimension of the Key vector.
+
+- These scores are then passed through a softmax function giving:
+$$\text{Attention Weights}(i, j) = \text{softmax}\left( \frac{Q_i \cdot K_j}{\sqrt{d_k}} \right)$$
+
+- Finally, the Value vectors are weighted by these attention scores to compute the output vector for Query $Q_i$:
+$$\text{Output}_i = \sum_{j} \text{Attention Weights}(i, j) \cdot V_j$$
+
 29
 
 ---

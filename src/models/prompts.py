@@ -26,7 +26,9 @@ TUTOR_USER_PROMPT = """### Relevant Course Slides & Context:
 {question}
 
 ### Instructions:
-Provide a clear, detailed, and technically rigorous explanation addressing the student's question. Reference the course materials provided and format all math in LaTeX."""
+1. If relevant course slides are provided above, ground your explanation strictly in them and cite the slide badge e.g. [Chapter 09_The Transformer, Slide 29].
+2. If NO relevant course slides are provided (or context is empty), explicitly state that this topic is not covered in the ENSIA NLP course lecture slides before offering a brief high-level answer. Never hallucinate or cite non-existent course slides.
+3. Format all equations and mathematical variables in LaTeX syntax ($...$ inline, $$...$$ display)."""
 
 
 QUIZ_GENERATOR_SYSTEM_PROMPT = """You are the Exam & Quiz Authoring Engine for the ENSIA Natural Language Processing course.
