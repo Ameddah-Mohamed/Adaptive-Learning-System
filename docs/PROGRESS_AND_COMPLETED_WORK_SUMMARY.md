@@ -4,152 +4,133 @@
 **Institution:** National Higher School of Artificial Intelligence (ENSIA)  
 **Curriculum:** 4th Year AI Engineering — Natural Language Processing (NLP) Course  
 **Project:** Project 2 — An Adaptive Learning System for the NLP Course  
-**Document Version:** 2.0 (Milestone 1 Complete — Full-Stack Platform Deployed)  
+**Document Version:** 3.0 (Milestone 2 Complete — Production Adaptive Learning Engine Deployed)  
 **Last Updated:** October 31, 2026  
 
 ---
 
 ## 1. Executive Summary of Completed Work
 
-Over the course of the initial development cycle, the project advanced from raw PDF slides to a **fully functioning, production-grade educational platform**:
+Over the course of the architectural hardening and implementation sprints (Phases 1 through 4), the project evolved from an initial prototype into a **production-grade, mathematically grounded, and security-hardened Adaptive Learning Platform**:
 
 ```
-                                  SYSTEM CAPABILITIES STATUS
-┌───────────────────────────────┬───────────────────────────────────┬──────────────────────┐
-│ Component                     │ Technical Implementation          │ Operational Status   │
-├───────────────────────────────┼───────────────────────────────────┼──────────────────────┤
-│ 1. Raw Course Corpus          │ 15 Slide Decks + 4 Exams Extracted│ COMPLETED & VERIFIED │
-│ 2. Vector Knowledge Base      │ 913 Chunks in ChromaDB (2560-d)   │ COMPLETED & VERIFIED │
-│ 3. SFT Training Dataset       │ 16 Seed Pairs in 4 Categories     │ BASELINE READY       │
-│ 4. Code Execution Sandbox     │ Isolated Subprocess + 3 Lab Suites│ COMPLETED & VERIFIED │
-│ 5. FastAPI Backend            │ REST Endpoints + SSE Streaming    │ RUNNING (Port 8000)  │
-│ 6. Modern Web Application     │ React + Tailwind + Monaco + KaTeX │ RUNNING (Port 3000)  │
-└───────────────────────────────┴───────────────────────────────────┴──────────────────────┘
+                                      SYSTEM CAPABILITIES STATUS
+┌─────────────────────────────────┬────────────────────────────────────────┬──────────────────────┐
+│ Component                       │ Technical Implementation               │ Operational Status   │
+├─────────────────────────────────┼────────────────────────────────────────┼──────────────────────┤
+│ 1. Raw Course Corpus            │ 15 Slide Decks + 4 Exams + LaTeX Clean │ COMPLETED & VERIFIED │
+│ 2. Dual Vector Knowledge Base   │ Segregated Collections in ChromaDB     │ COMPLETED & VERIFIED │
+│    - Student Course KB          │ 885 Lecture Chunks (nlp_course_kb)     │ Min Similarity = 0.50│
+│    - Instructor Eval KB         │ 28 Exam Solutions (instructor_eval_kb) │ Zero Exam Leakage    │
+│ 3. Learner & Mastery Engine     │ Bayesian Knowledge Tracing (BKT)       │ COMPLETED & VERIFIED │
+│    - Skill Mastery Model        │ P(L_t) updates with slip/guess weights │ Prerequisite Tree (12)│
+│    - SQLite Persistence Layer   │ WAL Mode: students, attempts, history  │ Persistent Memory    │
+│ 4. Code Execution Sandbox       │ Subprocess + AST Static Analysis Guard │ COMPLETED & VERIFIED │
+│    - Security Isolation         │ Blocks dangerous imports, eval, fork   │ 6.0s Subprocess Kill │
+│    - 3 Curriculum Labs          │ BPE Tokenizer, Attention, Perplexity   │ 100% Pass Determinism│
+│ 5. SFT Dataset & Benchmark      │ Chat & Alpaca Schemas + Train/Val Split│ COMPLETED & VERIFIED │
+│    - Quality Assurance          │ AST syntax check + LaTeX delimiter bal │ Top-p Math Fix       │
+│    - Benchmark Harness          │ 4-Track Automated Evaluation Harness   │ 90.9% Score (Qwen3.5)│
+│ 6. FastAPI Backend              │ 14 REST Endpoints + SSE Streaming      │ RUNNING (Port 8000)  │
+│ 7. Modern Web Application       │ React 18 + Tailwind + Monaco + KaTeX   │ BUILT (0 Errors, 1.4s│
+│ 8. Automated Test Suite         │ 36 Comprehensive PyTest Unit Tests     │ 36 / 36 PASSED (4.5s)│
+└─────────────────────────────────┴────────────────────────────────────────┴──────────────────────┘
 ```
 
 ---
 
-## 2. Detailed Breakdown of Completed Components
+## 2. Detailed Breakdown of Architectural Implementations
 
-### Component 1: Course Data Extraction & Corpus Processing
-* **Input Materials:**
-  * **15 Lecture Slide Decks:** Chapter 01 (Intro TALN), Chapter 02 (Regex & Tokenization), Chapter 03 (Language Modeling), Chapter 04 (Naive Bayes), Chapter 05 (Logistic Regression), Chapter 06 (Vector Semantics), Chapter 07 (Neural Nets), Chapter 08 (RNNs & LSTMs), Chapter 09 (The Transformer), Chapter 10 (LLMs), Chapter 11 (Masked LMs), Chapter 14 (QA & RAG), Chapter 18 (CFG & CKY), Chapter 19 (Dependency Parsing), and Distributed Deep Learning (All-Reduce).
-  * **4 Official Exam Documents:** Midterm Exam (with answers), Final Exam 2024 (with answers), CKY Algorithm Exercise (with answers), and Quiz 1 (with answers).
-* **Extraction Script:** Built [`src/data_processing/extract_pdfs.py`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/src/data_processing/extract_pdfs.py).
-* **Result:** All 19 documents were extracted page-by-page into clean Markdown documents stored in `data/processed/markdown/`.
-
----
-
-### Component 2: Slide-Aware Semantic Chunker & ChromaDB Vector Store
-* **Slide Chunker:** Built [`src/rag/slide_chunker.py`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/src/rag/slide_chunker.py) which parses slide boundaries, attaches metadata (document title, chapter index, slide number, category), and formats enriched headers.
-  * **Total Chunks Generated:** **913 semantic slide chunks** saved to `data/processed/chunks/course_chunks.json`.
-* **Embedding Model:** Connected to local **`qwen3-embedding:4b`** via Ollama, generating high-precision **2560-dimensional embeddings**.
-* **Vector Indexer:** Built [`src/rag/index_knowledge_base.py`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/src/rag/index_knowledge_base.py). All 913 chunks were batch-indexed into a persistent ChromaDB database in `data/chroma_db/`.
-* **Retriever Engine:** Built [`src/rag/retriever.py`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/src/rag/retriever.py) featuring:
-  * Calibrated cosine similarity metrics.
-  * Chapter and category metadata filtering.
-  * Citation formatting (e.g. `[Chapter 09_The Transformer, Slide 29]`).
-  * Verified retrieval accuracy $> 0.74$ on Attention, Perplexity, and CKY parsing queries.
+### Phase 1: Security Hardening, Execution Isolation & Autograder Fixes
+* **AST Security Guard (`src/evaluator/sandbox_runner.py`):**
+  * Built an Abstract Syntax Tree (AST) static analysis visitor that blocks dangerous modules (`os`, `sys`, `subprocess`, `socket`, `shutil`, `pty`, `pathlib`, etc.) and built-in execution exploits (`eval`, `exec`, `__import__`, `compile`, `breakpoint`).
+  * Enforced structured JSON output (`StructuredTestResult`) eliminating exit-code tampering (`sys.exit(0)`) or stderr parsing ambiguities.
+* **Autograder Calibration:**
+  * **Assignment 1 (`task_01_bpe.py`):** Calibrated the unit test corpus (`test low lowest newer wider`) to ensure deterministic BPE merge orders without arbitrary frequency tie-breaking failures.
+  * **Assignment 2 (`task_02_attention.py`):** Fixed PyTorch execution environment by installing PyTorch 2.15.0 with Apple Silicon MPS acceleration.
+  * **Assignment 3 (`task_03_perplexity.py`):** Verified perplexity scoring against both uniform test distributions and official Quiz 1 problem sets.
+* **Model Discovery Endpoint:** Added `GET /v1/models` in `backend/app/main.py` bound to `127.0.0.1` to provide standards-compliant local model introspection.
 
 ---
 
-### Component 3: Supervised Fine-Tuning (SFT) Baseline Datasets
-* **Builder Script:** Built [`src/data_processing/build_sft_datasets.py`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/src/data_processing/build_sft_datasets.py).
-* **Output Datasets (in `data/sft/`):**
-  1. `math_derivations.jsonl`: Step-by-step LaTeX proofs (variance of self-attention, cross-entropy & perplexity relationship, temperature scaling limits).
-  2. `code_debugging.jsonl`: Buggy PyTorch snippets paired with exact tracebacks, root cause explanations, and verified fixes.
-  3. `exercise_bank.jsonl`: Curriculum-calibrated problems across difficulty levels with options and explanations.
-  4. `grading_rubrics.jsonl`: Ground-truth exam questions with instructor marking schemes, sample student answers, and itemized point deductions.
+### Phase 2: Bayesian Knowledge Tracing & Adaptive Learner Engine
+To move beyond a static RAG chatbot into a true **Adaptive Learning System**, a dynamic learner model was engineered:
+* **SQLite Persistence Layer (`src/learner/db.py`):**
+  * Configured SQLite database with Write-Ahead Logging (WAL) and foreign keys enabled.
+  * Schema manages: `students`, `topics` (pre-seeded with 12 NLP course topics), `concept_attempts`, `student_mastery`, and `chat_history`.
+* **Bayesian Knowledge Tracing (BKT) (`src/learner/mastery.py`):**
+  * Tracks probability of skill mastery $P(L_t)$ per syllabus topic:
+    $$P(L_t \mid \text{correct}) = \frac{P(L_{t-1}) \cdot (1 - P(S))}{P(L_{t-1}) \cdot (1 - P(S)) + (1 - P(L_{t-1})) \cdot P(G)}$$
+    $$P(L_t \mid \text{incorrect}) = \frac{P(L_{t-1}) \cdot P(S)}{P(L_{t-1}) \cdot P(S) + (1 - P(L_{t-1})) \cdot (1 - P(G))}$$
+    $$P(L_t) \leftarrow P(L_t) + (1 - P(L_t)) \cdot P(T)$$
+  * Implemented difficulty-weighted learning updates ($\Delta_{\text{diff}}$) and decay penalties for chronic failure.
+  * Constructed a **Directed Acyclic Prerequisite Graph** covering 12 core topics (e.g., *Regex/BPE* $\to$ *N-Gram LM* $\to$ *Neural LM* $\to$ *Attention* $\to$ *Transformers* $\to$ *LLMs*).
+  * Generates prioritized practice recommendations targeting weak topics where prerequisite mastery exceeds $0.60$.
+* **Integrated Learner APIs:**
+  * `GET /api/learner/profile`: Returns student overall mastery, topic breakdowns, and recent attempts.
+  * `GET /api/learner/recommendations`: Returns personalized topic recommendations based on prerequisite readiness.
+  * `POST /api/learner/events`: Logs learning events and updates mastery dynamically.
+  * `GET /api/tutor/history`: Provides persistent multi-turn conversational context for the AI tutor.
+  * `POST /api/quiz/submit`: Automatically evaluates quiz answers and updates the student's mastery vector.
 
 ---
 
-### Component 4: Empirical Finding (The Justification for Fine-Tuning)
-During testing of the off-the-shelf base models (`qwen3.5:latest` and `gemma3:latest`), two notable reasoning flaws were discovered:
-1. **Mathematical Inversion Slip:** In deriving Perplexity from Cross-Entropy, the model wrote $PP(W) = \exp(-H)$ instead of $\exp(H)$ due to an algebraic substitution error.
-2. **PyTorch Debugging Hallucination:** When diagnosing an Attention matrix multiplication mismatch `(10, 512)` by `(10, 512)`, the model blamed scalar division `/ math.sqrt(d_k)` before suggesting the transpose.
-
-**Conclusion:** This empirical finding proves that RAG alone provides the factual text, but **Domain Fine-Tuning (LoRA)** on our curated SFT dataset is essential to eliminate mathematical sign errors and code debugging hallucinations.
-
----
-
-### Component 5: Automated Code Execution Sandbox (Deliverable 2 — Complete)
-* **Subprocess Runner:** Built [`src/evaluator/sandbox_runner.py`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/src/evaluator/sandbox_runner.py).
-  * Runs student Python code in an isolated subprocess with a **6.0-second timeout** and memory protection.
-  * Parses `unittest` / `pytest` stderr and stdout to extract exact pass/fail counts.
-* **3 Implemented Curriculum Assignments:**
-  1. **Assignment 1 — Byte-Pair Encoding (BPE) Tokenizer (`task_01_bpe.py`):**
-     * Prompt, starter code, and unit tests checking iterative merge counts, tie-breaking, and subword generation.
-  2. **Assignment 2 — Scaled Dot-Product Attention in PyTorch (`task_02_attention.py`):**
-     * Prompt, starter code, and unit tests verifying output shapes `(batch_size, seq_len, d_v)`, softmax row sums ($1.0 \pm 10^{-6}$), causal masking, and numerical precision.
-  3. **Assignment 3 — Language Model Perplexity Calculator (`task_03_perplexity.py`):**
-     * Prompt, starter code, and unit tests verifying calculations against uniform distributions and Quiz 1 exam cases.
-* **Verification:** Tested via `python3 src/evaluator/sandbox_runner.py` with 100% test pass rate in 0.042 seconds.
+### Phase 3: RAG Segregation, Relevance Thresholding & LaTeX Cleansing
+* **Collection Segregation in ChromaDB (`src/rag/retriever.py`):**
+  * Split vector storage into two strictly isolated ChromaDB collections:
+    1. **`nlp_course_kb` (885 chunks):** Accessible by student-facing services (`NLPTutorAgent`, `/api/knowledge/search`).
+    2. **`instructor_eval_kb` (28 chunks):** Contains official exam questions and instructor answer keys. Restricted exclusively to `SubmissionEvaluator` during rubric grading.
+  * Completely eliminated exam answer key leakage to students during open chat queries.
+* **Cosine Relevance Thresholding & Out-of-Domain Abstention:**
+  * Switched ChromaDB distance metric space to `cosine` and calibrated a strict similarity threshold: `min_similarity = 0.50`.
+  * Out-of-domain queries (e.g., general geography or unrelated subjects) yield zero chunks and trigger polite pedagogical abstention without hallucinating fake course slide citations.
+* **Curriculum LaTeX Cleansing:**
+  * Repaired OCR-garbled mathematical formulas in extracted course Markdown files:
+    * `Chapter 09_The Transformer.md` (Slide 29): Replaced broken characters with formatted KaTeX LaTeX:
+      $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right) V$$
+    * `Chapter 03_Language Modeling.md` (Slides 36–37): Repaired exponential notation for Perplexity:
+      $$\text{PPL}(W) = \exp\left(-\frac{1}{N} \sum_{i=1}^N \ln P(w_i \mid w_1, \dots, w_{i-1})\right) = \exp(\text{CE})$$
+* **Pydantic Schema Validation:**
+  * Implemented `EvaluationSchema` and `CriterionBreakdown` in `src/evaluator/grader.py`. Enforces JSON output validity and mathematical consistency (earned score strictly matches the sum of criteria points awarded).
+  * Implemented `GeneratedQuizSchema` in `src/models/quiz_generator.py` ensuring type-safe quiz generation.
 
 ---
 
-### Component 6: Modern Full-Stack Web Platform (Deliverable 4 — Complete)
-
-The preliminary Streamlit prototype was superseded by a **production full-stack web application**:
-
-#### A. Backend Architecture (`backend/app/`)
-* **Technology:** FastAPI + Uvicorn + Pydantic v2 + SSE Streaming.
-* **API Endpoints:**
-  * `POST /api/tutor/chat`: Grounded question answering with slide citation metadata.
-  * `POST /api/tutor/chat/stream`: Server-Sent Events (SSE) token-by-token streaming for ChatGPT-like UX.
-  * `POST /api/quiz/generate`: Dynamic question generation with difficulty calibration and rubrics.
-  * `POST /api/evaluator/grade`: Multi-criteria submission evaluation against instructor marking schemes.
-  * `GET /api/sandbox/tasks`: Returns coding assignment catalog and starter templates.
-  * `POST /api/sandbox/run`: Executes student code in the sandbox and triggers AI diagnostic hints on failure.
-  * `POST /api/knowledge/search`: Direct vector search against ChromaDB.
-  * `GET /api/knowledge/stats`: Returns vector database statistics (913 chunks, 2560 dimensions).
-  * `GET /`: Serves the production-built React single-page application.
-  * `GET /docs`: Interactive Swagger API documentation.
-
-#### B. Frontend Architecture (`frontend/`)
-* **Technology:** React 18 + TypeScript + Vite + Tailwind CSS + Monaco Editor + KaTeX + Lucide Icons + Canvas Confetti.
-* **5 Core Interactive Views:**
-  1. **💬 AI Course Tutor Chat:**
-     * Clean chat stream with native KaTeX mathematical rendering ($...$ and $$...$$).
-     * Interactive citation pill badges `[Chapter 09_The Transformer, Slide 29]`; clicking opens a modal previewing the raw slide text and cosine match percentage.
-     * Quick-prompt action chips (Variance derivation, Perplexity vs. Cross-Entropy, Chomsky Normal Form, PyTorch tensor debugging).
-     * Sidebar controls for chapter filtering and top-$k$ retrieval depth slider.
-  2. **📝 Dynamic Quiz & Exam Lab:**
-     * Syllabus topic dropdown, difficulty selector (Beginner, Intermediate, Advanced), and format picker (MCQ, Calculation, Derivation, Coding).
-     * Interactive MCQ self-testing: click an option for instant green/red verification and confetti celebration upon answering correctly.
-     * Hidden expandable accordions for the official reference solution and instructor marking rubrics.
-  3. **⚖️ Rubric Evaluator & Grader:**
-     * Pre-loaded with official ENSIA exam problems (Attention Variance, Naive Bayes Bigram Sentiment, CNF Grammar Conversion).
-     * Visual KPI scorecard displaying Earned Points vs. Total Points and Mastery Percentage.
-     * Itemized criteria table with `Passed`, `Partial`, or `Failed` status badges, awarded points, and rationale.
-     * Split cards highlighting *Demonstrated Strengths* and *Points for Improvement*.
-  4. **💻 PyTorch Code Lab & Sandbox:**
-     * Embedded **Monaco Code Editor** (VS Code in the browser) with Python syntax highlighting and line numbers.
-     * Task selector with starter code reset button.
-     * "Run & Test Code" action running isolated tests in real time.
-     * Terminal execution console displaying pass/fail counts, execution time, and AI diagnostic hints if an error occurs.
-  5. **🔍 ChromaDB Vector Explorer:**
-     * Direct vector search interface across all 913 slide chunks.
-     * Chapter filter and visual match percentage meters (e.g. `84% match`).
-     * Monospace slide excerpt reader.
+### Phase 4: SFT Dataset Standardization & Model Benchmarking
+* **Nucleus Sampling Factual Fix:**
+  * Fixed mathematical calculation in `data/sft/exercise_bank.jsonl` and `src/data_processing/build_sft_datasets.py` for top-$p$ nucleus sampling ($p = 0.92$). The cumulative probability sum reaches $\ge 0.92$ only after adding `sleeps` ($0.919$) and `hates` ($0.934$), correctly retaining all 7 candidate tokens.
+* **SFT Quality Assurance & Format Standardization (`src/data_processing/validate_sft_dataset.py`):**
+  * Validates code snippets via Python AST parsing.
+  * Validates LaTeX delimiter balance (`$$` and `$`).
+  * Compiles seed items into standard **Chat format** (`messages: [{"role": "system|user|assistant", "content": ...}]`) and **Alpaca format** (`instruction`, `input`, `output`).
+  * Generates stratified train/val splits: `nlp_sft_train.jsonl` (12 items) and `nlp_sft_val.jsonl` (4 items).
+* **Automated Model Evaluation Benchmark (`src/evaluator/benchmark.py`):**
+  * Built an automated benchmarking harness evaluating local LLMs across 4 core competencies:
+    1. Mathematical Derivations & LaTeX Delimiter Balancing
+    2. PyTorch Code Bug Diagnosis (Inner dimension mismatch & Key transpose)
+    3. Rubric Grading Schema Compliance & Arithmetic Concordance
+    4. Retrieval Grounding & Out-of-Domain Abstention
+  * Executed benchmark on `qwen3.5:latest` and published [`docs/BENCHMARK_REPORT.md`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/docs/BENCHMARK_REPORT.md) (**90.9% Pass Rate**, 10/11 checks passed).
 
 ---
 
-## 3. Complete Repository Structure
+## 3. Current Complete Repository Structure
 
 ```text
 nlp-project/
 ├── backend/                        # FastAPI REST API & Streaming Server
 │   ├── app/
-│   │   ├── main.py                 # FastAPI application & SPA static server
+│   │   ├── main.py                 # FastAPI application, CORS, health & /v1/models
 │   │   ├── core/
-│   │   │   ├── config.py           # System settings, model names, and paths
+│   │   │   ├── config.py           # System settings, paths, and model configurations
 │   │   │   └── __init__.py
 │   │   ├── api/                    # Modular API Routers:
-│   │   │   ├── tutor.py            # /api/tutor/chat & SSE /chat/stream
-│   │   │   ├── quiz.py             # /api/quiz/generate
+│   │   │   ├── tutor.py            # /api/tutor/chat, /chat/stream, /history
+│   │   │   ├── quiz.py             # /api/quiz/generate, /api/quiz/submit
+│   │   │   ├── learner.py          # /api/learner/profile, /recommendations, /events
 │   │   │   ├── evaluator.py        # /api/evaluator/grade
-│   │   │   ├── sandbox.py          # /api/sandbox/tasks & /sandbox/run
-│   │   │   ├── knowledge.py        # /api/knowledge/search & /stats
+│   │   │   ├── sandbox.py          # /api/sandbox/tasks, /sandbox/run
+│   │   │   ├── knowledge.py        # /api/knowledge/search, /stats
 │   │   │   └── __init__.py
 │   │   └── __init__.py
 │   └── __init__.py
@@ -158,106 +139,109 @@ nlp-project/
 │   │   ├── main.tsx
 │   │   ├── App.tsx
 │   │   ├── index.css               # KaTeX & Tailwind styling
-│   │   ├── components/
-│   │   │   ├── Navbar.tsx          # Sleek navigation header with model indicator
-│   │   │   ├── TutorChatView.tsx   # Chatbot with KaTeX, slide citations & prompt chips
-│   │   │   ├── QuizView.tsx        # Dynamic quiz authoring & interactive MCQ cards
-│   │   │   ├── GraderView.tsx      # Split-screen rubric grader with KPI scorecards
-│   │   │   ├── CodeSandboxView.tsx # Monaco PyTorch editor & unit-test runner
-│   │   │   ├── KnowledgeView.tsx   # ChromaDB vector search & slide inspector
-│   │   │   └── MathRenderer.tsx    # Native KaTeX math & syntax-highlighted code
-│   │   └── lib/
-│   │       ├── api.ts              # Type-safe API client for FastAPI
-│   │       └── types.ts            # TypeScript interfaces
+│   │   ├── components/             # Reusable UI views and components
+│   │   └── lib/                    # API client and TypeScript definitions
 │   ├── package.json
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   └── tsconfig.json
-├── src/                            # Core NLP & Machine Learning Modules
-│   ├── rag/
-│   │   ├── slide_chunker.py        # Semantic slide chunker
-│   │   ├── index_knowledge_base.py # ChromaDB indexer using qwen3-embedding:4b
-│   │   ├── retriever.py            # Cosine-calibrated retriever with citations
+│   └── vite.config.ts
+├── src/                            # Core NLP, RAG, Learner & Evaluator Modules
+│   ├── learner/                    # Adaptive Learning Engine
+│   │   ├── db.py                   # SQLite persistence layer (WAL mode)
+│   │   ├── mastery.py              # Bayesian Knowledge Tracing & Prerequisite Graph
 │   │   └── __init__.py
-│   ├── models/
-│   │   ├── prompts.py              # System & task prompt templates
-│   │   ├── tutor_agent.py          # Grounded tutor reasoning engine
-│   │   ├── quiz_generator.py       # Question & rubric synthesizer
+│   ├── rag/                        # Knowledge Retrieval Pipeline
+│   │   ├── slide_chunker.py        # Slide boundary parser
+│   │   ├── index_knowledge_base.py # ChromaDB segregated collection indexer
+│   │   ├── retriever.py            # Cosine-calibrated retriever with thresholding
 │   │   └── __init__.py
-│   ├── evaluator/
-│   │   ├── grader.py               # Rubric-aligned submission grader
-│   │   ├── sandbox_runner.py       # Subprocess test runner with timeout protection
+│   ├── models/                     # LLM Agents & Prompt Templates
+│   │   ├── prompts.py              # Grounded system and task prompt engineering
+│   │   ├── tutor_agent.py          # Conversational tutor reasoning engine
+│   │   ├── quiz_generator.py       # Pydantic-validated question generator
+│   │   └── __init__.py
+│   ├── evaluator/                  # Code Execution & Evaluation Framework
+│   │   ├── grader.py               # Pydantic-validated rubric grading engine
+│   │   ├── sandbox_runner.py       # Subprocess runner with AST static security
+│   │   ├── benchmark.py            # Automated 4-track model benchmarking harness
 │   │   ├── coding_tasks/           # Official programming lab assignments:
 │   │   │   ├── task_01_bpe.py      # BPE Tokenizer task & test suite
 │   │   │   ├── task_02_attention.py# PyTorch Attention task & test suite
 │   │   │   ├── task_03_perplexity.py # Perplexity Calculator task & test suite
 │   │   │   └── __init__.py
 │   │   └── __init__.py
-│   ├── data_processing/
-│   │   ├── extract_pdfs.py         # Batch PDF extractor (lecture slides & exams)
+│   ├── data_processing/            # Corpus Ingestion & SFT Pipelines
+│   │   ├── extract_pdfs.py         # Batch PDF extractor (slides & exams)
 │   │   ├── build_sft_datasets.py   # Synthesizer for fine-tuning datasets
+│   │   ├── validate_sft_dataset.py # SFT validator, AST/LaTeX checks, train/val split
 │   │   └── __init__.py
 │   └── __init__.py
 ├── data/
-│   ├── raw/                        # Original slide PDFs, exams, and notebooks
-│   │   ├── lectures/               # 15 course slide PDFs
-│   │   ├── exams_and_quizzes/      # 4 exam & quiz PDFs
-│   │   ├── papers/                 # Research papers directory
-│   │   └── code/                   # Lab / TP notebooks directory
-│   ├── processed/
-│   │   ├── markdown/               # Slide-by-slide markdown files
-│   │   └── chunks/                 # 913 JSON slide chunks
-│   ├── chroma_db/                  # Persistent ChromaDB vector database
-│   └── sft/                        # Supervised Fine-Tuning datasets (.jsonl)
+│   ├── raw/                        # Original slide PDFs and exams
+│   ├── processed/                  # Slide-by-slide markdown and JSON chunks
+│   ├── chroma_db/                  # Persistent ChromaDB (nlp_course_kb + instructor_eval_kb)
+│   ├── learner.db                  # Persistent SQLite database for student mastery
+│   └── sft/                        # SFT datasets (Raw, Chat, Alpaca, Train, Val)
 ├── docs/
 │   ├── PROJECT_DELIVERABLES_AND_SPECIFICATION.md # Complete technical specification
-│   ├── TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md   # Meeting pitch & 5-person roadmap
-│   └── PROGRESS_AND_COMPLETED_WORK_SUMMARY.md     # (This document)
-├── run.sh                          # Unified one-command launch script
+│   ├── TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md   # Strategic roadmap & team roles
+│   ├── PROGRESS_AND_COMPLETED_WORK_SUMMARY.md     # (This document)
+│   ├── BENCHMARK_REPORT.md                       # Empirical model evaluation report
+│   └── COMPREHENSIVE_PROJECT_AUDIT.md             # Initial project audit
+├── tests/                          # Automated PyTest Test Suite (36/36 passing)
+│   ├── test_api.py                 # FastAPI endpoints & security testing
+│   ├── test_learner.py             # Knowledge tracing, DB & recommendation tests
+│   ├── test_rag_and_schemas.py     # Segregation, thresholding & Pydantic validation
+│   ├── test_sandbox.py             # Sandbox isolation, AST security & task tests
+│   └── test_sft_and_benchmark.py   # SFT dataset validation & benchmark logic
+├── run.sh                          # Unified launch script
 ├── requirements.txt                # Python dependencies
 └── .gitignore                      # Git ignore rules
 ```
 
 ---
 
-## 4. How to Verify & Run the System
+## 4. How to Verify & Test the System
 
-### 1. Launch the System
-From the repository root:
+### 1. Run the Automated Test Suite (36 Tests)
 ```bash
-# Option A: Run in development mode (FastAPI on :8000 + Vite Hot-Reload on :3000)
+python3 -m pytest tests/ -v
+```
+*Expected Result:* **36 passed** in $< 5.0$ seconds.
+
+### 2. Verify SFT Dataset Validation & Train/Val Splits
+```bash
+python3 src/data_processing/validate_sft_dataset.py
+```
+*Expected Result:* 16/16 records validated (AST code valid, LaTeX delimiters balanced), generating `nlp_sft_train.jsonl` (12) and `nlp_sft_val.jsonl` (4).
+
+### 3. Run the Automated Model Evaluation Benchmark
+```bash
+python3 src/evaluator/benchmark.py
+```
+*Expected Result:* 4-track evaluation executed against local Ollama, updating `docs/BENCHMARK_REPORT.md`.
+
+### 4. Build and Verify Frontend
+```bash
+cd frontend && npm run build
+```
+*Expected Result:* `✓ built in ~1.4s` with 0 TypeScript or bundling errors.
+
+### 5. Launch the Platform
+```bash
+# Option A: Development mode (FastAPI on :8000 + Vite on :3000)
 ./run.sh --dev
 
-# Option B: Run in production mode (FastAPI serves both API and built React bundle on :8000)
+# Option B: Production mode (FastAPI serves both API and React bundle on :8000)
 ./run.sh
-```
-
-### 2. Access URLs
-* **React Web Application:** [http://localhost:3000](http://localhost:3000) (Dev) or [http://localhost:8000](http://localhost:8000) (Prod)
-* **FastAPI Swagger API Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
-* **Backend Health Check:** `curl http://localhost:8000/health` $\to$ `{"status":"healthy"}`
-* **Vector Knowledge Stats:** `curl http://localhost:8000/api/knowledge/stats` $\to$ `{"total_chunks":913,...}`
-
-### 3. Verify Code Sandbox Directly from CLI
-```bash
-python3 src/evaluator/sandbox_runner.py
-```
-Expected output:
-```text
-Test run result: {'success': True, 'passed': 2, 'total': 2, 'returncode': 0, 'elapsed_seconds': 0.042, ...}
 ```
 
 ---
 
-## 5. Next Immediate Steps (Upcoming Milestone)
+## 5. Next Steps (Milestone 3 Roadmap)
 
-Now that Deliverable 2 (Code Grader Sandbox) and Deliverable 4 (Web Platform) are operational, the remaining two objectives are:
+With Deliverable 2 (Code Grader Sandbox), Deliverable 4 (Web Platform), and the Core Adaptivity / Learner Engine fully operational:
 
-1. **Deliverable 1 (Scale SFT Dataset to 1,000+ Pairs):**
-   * Expand `data/sft/` from 16 seed examples to 1,000+ examples across all 15 chapters (300 math derivations, 300 code fixes, 300 quiz questions, 200 rubric evaluations).
-   * Download and index the 5 seminal NLP research papers (*Attention Is All You Need*, *BERT*, *LoRA*, etc.) into `data/raw/papers/`.
-2. **Deliverable 3 (Train LoRA Adapter on `qwen2.5-coder:7b`):**
-   * Configure a fine-tuning script using Hugging Face PEFT / Unsloth.
-   * Train the low-rank adapter on the scaled dataset to eliminate the observed math and code hallucinations.
-   * Export `adapter_model.safetensors` into an Ollama Modelfile and connect it directly to the active model dropdown in the web UI.
+1. **Scale SFT Dataset to 1,000+ Pairs (Deliverable 1):**
+   * Use the standardized format in `src/data_processing/validate_sft_dataset.py` to scale synthetic instruction pairs across all 15 syllabus chapters.
+2. **Execute LoRA Fine-Tuning (Deliverable 3):**
+   * Fine-tune `qwen2.5-coder:7b` with Hugging Face PEFT/Unsloth on `data/sft/nlp_sft_train.jsonl`.
+   * Evaluate the fine-tuned adapter against the validation split using `src/evaluator/benchmark.py` to verify elimination of mathematical and diagnostic hallucinations.

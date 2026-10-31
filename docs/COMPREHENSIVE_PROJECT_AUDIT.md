@@ -9,6 +9,17 @@
 
 ---
 
+> [!IMPORTANT]
+> **AUDIT RESOLUTION ADDENDUM (October 31, 2026 — Post-Audit Sprint Resolution):**  
+> All critical flaws, vulnerabilities, and architectural gaps identified in this initial audit have been systematically resolved across 4 implementation phases and verified via automated test suites:
+> - **Phase 1 (Commit `892e41f`):** Hardened the code execution sandbox with AST static analysis, eliminated test runner bypasses, calibrated BPE/Attention unit tests, and resolved PyTorch MPS runtime dependencies.
+> - **Phase 2 (Commit `79bf60f`):** Built the core adaptivity engine with Bayesian Knowledge Tracing (BKT), prerequisite DAG across 12 NLP topics, SQLite WAL persistence, multi-turn tutor conversational memory, and adaptive quiz generation.
+> - **Phase 3 (Commit `25194b0`):** Eliminated exam ground-truth leakage by segregating ChromaDB into `nlp_course_kb` and `instructor_eval_kb`, enforced cosine relevance thresholding (`0.50`), cleansed OCR-garbled LaTeX formulas in Markdown slides, and added Pydantic schema validation for rubrics and quizzes.
+> - **Phase 4 (Commit `4d8969e`):** Fixed the nucleus sampling top-$p$ calculation error, standardized SFT datasets into Chat and Alpaca schemas with train/val splits, and established an automated model evaluation benchmark harness (`docs/BENCHMARK_REPORT.md` — 90.9% pass rate).
+> - **Frontend & Tests:** The frontend builds with 0 errors (`npm run build` in 1.4s), and the entire test suite passes 100% (**36 / 36 unit tests passed** via `pytest`).
+
+---
+
 ## 0. How to read this report
 
 ### 0.1 Evidence standard
