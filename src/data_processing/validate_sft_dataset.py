@@ -49,7 +49,10 @@ def format_to_chat(category: str, raw_item: Dict[str, Any]) -> Dict[str, Any]:
     Converts a heterogeneous raw record into the standard Chat format:
     {"id": str, "category": str, "topic": str, "messages": [{"role": "system|user|assistant", "content": str}]}
     """
-    item_id = raw_item.get("id", f"{category[:4].upper()}-{random.randint(100, 999)}")
+    item_id = raw_item.get("id")
+    if not item_id:
+        seed_hash = abs(hash(raw_item.get("topic", "") + raw_item.get("instruction", ""))) % 1000
+        item_id = f"{category[:4].upper()}-{seed_hash:03d}"
     topic = raw_item.get("topic", "NLP Curriculum")
 
     system_prompt = "You are the Specialized AI Tutor for the ENSIA Natural Language Processing course. You provide rigorous mathematical derivations, explain code debugging with PyTorch tensor shapes, and grade submissions against marking rubrics."
