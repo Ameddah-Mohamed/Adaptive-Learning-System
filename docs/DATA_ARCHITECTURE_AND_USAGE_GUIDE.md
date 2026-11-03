@@ -27,21 +27,17 @@ This guide answers each question step-by-step so our entire team is aligned and 
 
 In this system, data does **not** sit in a single folder doing only one job. Instead, our data flows into **two fundamentally separate pipelines**:
 
-```mermaid
-flowchart TD
-    Assets["<b>OUR DATA ASSETS</b><br/>(Lectures, Textbook, Papers, Exams, Code, Derivations)"]
+1. **Offline Pipeline (Pre-deployment):**
+   - **Purpose:** Train and fine-tune model adapter weights before users access the platform.
+   - **Key Assets:** `nlp_sft_train.jsonl` and `nlp_sft_val.jsonl`.
+   - **Core Engine:** Hugging Face `SFTTrainer` / PEFT using deterministic gradient backpropagation (the AI Agent does not run here).
+   - **Output:** Trained LoRA adapter weights (`adapter_model.safetensors`).
 
-    subgraph Offline ["OFFLINE PIPELINE (Before User Arrives)"]
-        LoRA["<b>LoRA Fine-Tuning</b><br/><i>(Hugging Face / PEFT)</i><br/><br/><b>Reads:</b><br/>• <code>nlp_sft_train.jsonl</code><br/>• <code>nlp_sft_val.jsonl</code><br/><br/><b>Output:</b><br/>LoRA adapter weights (<code>adapter_model.safetensors</code>)<br/><br/><b>Does Agent Run Here?</b><br/>❌ <b>NO</b> — Standard gradient backpropagation"]
-    end
-
-    subgraph Online ["ONLINE PIPELINE (Live User Session)"]
-        Platform["<b>Interactive Web Platform</b><br/><i>(FastAPI + ChromaDB)</i><br/><br/><b>Reads:</b><br/>• ChromaDB (1,288 chunks)<br/>• <code>exercise_bank.jsonl</code><br/>• <code>grading_rubrics.jsonl</code><br/>• <code>code_debugging.jsonl</code><br/><br/><b>Output:</b><br/>Grounded tutor chat, tests, rubric grading, code tests<br/><br/><b>Does Agent Run Here?</b><br/>✅ <b>YES</b> — Hybrid Agent + Python Engine"]
-    end
-
-    Assets --> Offline
-    Assets --> Online
-```
+2. **Online Pipeline (Live User Session):**
+   - **Purpose:** Power live student sessions with grounded retrieval, active exercises, and interactive feedback.
+   - **Key Assets:** ChromaDB vector store (1,288 curriculum chunks), `exercise_bank.jsonl`, `grading_rubrics.jsonl`, and `code_debugging.jsonl`.
+   - **Core Engine:** FastAPI runtime integrating our hybrid AI Agent with deterministic Python tools (AST parsers, sandbox execution).
+   - **Output:** Grounded tutor responses, adaptive quiz generation, automated rubric grading, and sandboxed code execution.
 
 | Pipeline | Timing | Core Stack | Input Data Assets | Primary Output | Agent Active? |
 | :--- | :--- | :--- | :--- | :--- | :--- |
