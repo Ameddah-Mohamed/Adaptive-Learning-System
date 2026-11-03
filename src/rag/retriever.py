@@ -14,6 +14,7 @@ import ollama
 EMBED_MODEL = "qwen3-embedding:4b"
 LECTURE_COLLECTION = "nlp_course_kb"
 EVAL_COLLECTION = "instructor_eval_kb"
+REFERENCE_COLLECTION = "reference_kb"
 
 
 def normalize_vector(v: List[float]) -> List[float]:
@@ -110,20 +111,58 @@ class CourseRetriever:
                 if sim < threshold:
                     continue
 
+                label = "Page" if meta.get("category") in ("textbook", "papers") else "Slide"
+                doc_name = meta.get("document", "")
+                num = meta.get("slide_num")
+                citation = f"[{doc_name}, {label} {num}]" if num and num > 0 else f"[{doc_name}]"
+
                 candidates.append({
                     "id": doc_id,
-                    "document": meta.get("document", ""),
+                    "document": doc_name,
                     "chapter": meta.get("chapter"),
-                    "slide_num": meta.get("slide_num"),
+                    "slide_num": num,
                     "category": meta.get("category"),
                     "text": text,
                     "similarity_score": round(sim, 4),
-                    "citation": f"[{meta.get('document')}, Slide {meta.get('slide_num')}]"
+                    "citation": citation
                 })
 
         # Sort strictly by calibrated cosine similarity descending
         candidates.sort(key=lambda x: x["similarity_score"], reverse=True)
         return candidates[:top_k]
+
+    def retrieve_hierarchical(
+        self,
+        query: str,
+        lecture_top_k: int = 3,
+        reference_top_k: int = 2,
+        min_similarity: Optional[float] = None
+    ) -> Dict[str, Any]:
+        """
+        Hierarchical retrieval:
+        1. Searches primary course lectures ('nlp_course_kb')
+        2. Searches reference textbook & papers ('reference_kb')
+        Returns both partitioned and combined result sets.
+        """
+        lecture_matches = self.retrieve(query, top_k=lecture_top_k, min_similarity=min_similarity)
+
+        ref_retriever = CourseRetriever(
+            persist_dir=self.persist_dir,
+            collection_name=REFERENCE_COLLECTION,
+            default_min_similarity=self.default_min_similarity
+        )
+        ref_matches = ref_retriever.retrieve(query, top_k=reference_top_k, min_similarity=min_similarity)
+
+        combined = list(lecture_matches)
+        for r in ref_matches:
+            if not any(c["id"] == r["id"] for c in combined):
+                combined.append(r)
+
+        return {
+            "lectures": lecture_matches,
+            "references": ref_matches,
+            "all": combined
+        }
 
     def is_in_domain(self, query: str, threshold: float = 0.50) -> bool:
         """Checks if a query matches any course slide above the threshold."""

@@ -15,6 +15,7 @@ import ollama
 EMBED_MODEL = "qwen3-embedding:4b"
 LECTURE_COLLECTION = "nlp_course_kb"
 EVAL_COLLECTION = "instructor_eval_kb"
+REFERENCE_COLLECTION = "reference_kb"
 BATCH_SIZE = 32
 
 
@@ -75,7 +76,7 @@ def _index_category_chunks(chunks: List[Dict[str, Any]], persist_dir: Path, coll
             {
                 "document": c.get("document", ""),
                 "chapter": c.get("chapter") if c.get("chapter") is not None else -1,
-                "slide_num": c.get("slide_num") if c.get("slide_num") is not None else -1,
+                "slide_num": c.get("slide_num") if c.get("slide_num") is not None else (c.get("page_num") if c.get("page_num") is not None else -1),
                 "category": c.get("category", "")
             }
             for c in batch
@@ -100,8 +101,27 @@ def _index_category_chunks(chunks: List[Dict[str, Any]], persist_dir: Path, coll
     return collection
 
 
+def index_reference_chunks(ref_chunks_file: Path, persist_dir: Path, batch_size: int = BATCH_SIZE):
+    if not ref_chunks_file.exists():
+        print(f"[!] Reference chunks file not found: {ref_chunks_file}")
+        return
+
+    with open(ref_chunks_file, "r", encoding="utf-8") as f:
+        chunks: List[Dict[str, Any]] = json.load(f)
+
+    print(f"\nIndexing Reference Knowledge Base ({len(chunks)} chunks)...")
+    _index_category_chunks(chunks, persist_dir, REFERENCE_COLLECTION, batch_size)
+
+
 if __name__ == "__main__":
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
     chunks_path = PROJECT_ROOT / "data" / "processed" / "chunks" / "course_chunks.json"
+    ref_chunks_path = PROJECT_ROOT / "data" / "processed" / "chunks" / "reference_chunks.json"
     chroma_path = PROJECT_ROOT / "data" / "chroma_db"
+
+    # Index primary course materials (lectures & exams)
     index_chunks(chunks_path, chroma_path)
+
+    # Index reference materials (textbook & papers)
+    if ref_chunks_path.exists():
+        index_reference_chunks(ref_chunks_path, chroma_path)

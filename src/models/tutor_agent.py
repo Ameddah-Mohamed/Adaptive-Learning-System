@@ -28,20 +28,30 @@ class NLPTutorAgent:
         self,
         question: str,
         chapter_filter: Optional[int] = None,
-        category_filter: Optional[str] = None
+        category_filter: Optional[str] = None,
+        use_reference: bool = True
     ) -> Dict[str, Any]:
         """
         Ask a question to the NLP tutor.
-        Retrieves relevant course slides, constructs a grounded prompt, and calls Ollama.
+        Retrieves relevant course slides & textbook/paper references,
+        constructs a grounded prompt, and calls Ollama.
         """
-        # Step 1: Retrieve grounded context from ChromaDB
-        retrieved_chunks = self.retriever.retrieve(
-            query=question,
-            top_k=self.top_k,
-            chapter=chapter_filter,
-            category=category_filter
-        )
-        
+        # Step 1: Retrieve grounded context from ChromaDB (hierarchical: lectures + references)
+        if use_reference:
+            h_res = self.retriever.retrieve_hierarchical(
+                query=question,
+                lecture_top_k=self.top_k,
+                reference_top_k=2
+            )
+            retrieved_chunks = h_res["all"]
+        else:
+            retrieved_chunks = self.retriever.retrieve(
+                query=question,
+                top_k=self.top_k,
+                chapter=chapter_filter,
+                category=category_filter
+            )
+
         context_str = self.retriever.format_context_for_prompt(retrieved_chunks)
         
         # Step 2: Format prompt
