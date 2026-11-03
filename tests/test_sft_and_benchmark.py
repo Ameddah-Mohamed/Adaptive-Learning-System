@@ -35,9 +35,9 @@ def test_code_syntax_checker():
 
 def test_sft_compilation_and_splits():
     report = compile_and_validate_all_datasets(SFT_DIR)
-    assert report["valid_count"] == 16
-    assert report["train_count"] == 12
-    assert report["val_count"] == 4
+    assert report["valid_count"] == 79
+    assert report["train_count"] == 63
+    assert report["val_count"] == 16
     assert len(report["errors"]) == 0
 
     # Verify generated files exist
@@ -55,7 +55,7 @@ def test_chat_format_structure():
     with open(train_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
-    assert len(lines) == 12
+    assert len(lines) == 63
     for line in lines:
         data = json.loads(line)
         assert "id" in data
@@ -69,20 +69,21 @@ def test_chat_format_structure():
         assert len(data["messages"][2]["content"]) > 0
 
 
-def test_nucleus_sampling_factual_consistency():
+def test_authentic_exam_exercise_consistency():
     ex_file = SFT_DIR / "exercise_bank.jsonl"
-    found = False
+    found_laplace = False
+    found_ppl = False
     with open(ex_file, "r", encoding="utf-8") as f:
         for line in f:
             data = json.loads(line)
-            if data.get("id") == "EX-DECODE-STRAT-01":
-                found = True
-                ans = data.get("correct_answer", "")
-                expl = data.get("explanation", "")
-                # Answer must include sleeps and hates
-                assert "sleeps" in ans
-                assert "hates" in ans
-                assert "sleeps" in expl
-                assert "hates" in expl
+            if data.get("id") == "EX-QUIZ1-Q09":
+                found_laplace = True
+                assert data["correct_answer"] == "B"
+                assert "Laplace smoothing" in data["question"]
+            elif data.get("id") == "EX-QUIZ1-Q08":
+                found_ppl = True
+                assert data["correct_answer"] == "C"
+                assert "perplexity" in data["question"]
 
-    assert found is True, "EX-DECODE-STRAT-01 not found in exercise_bank.jsonl"
+    assert found_laplace is True, "EX-QUIZ1-Q09 not found in exercise_bank.jsonl"
+    assert found_ppl is True, "EX-QUIZ1-Q08 not found in exercise_bank.jsonl"

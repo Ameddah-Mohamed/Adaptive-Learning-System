@@ -14,7 +14,7 @@
 
 Over the course of the architectural overhaul sprints (Phases 1 through 4), the project reached a major milestone: transitioning from a standard RAG/chat interface into a **true, secure, and mathematically grounded Adaptive Learning System**:
 
-* **Corpus Processing & Dual-Collection Segregation:** All **15 official lecture slide decks (Chapters 01–19 + Distributed DL)** and **4 official exams/quizzes with ground-truth answer keys** were parsed and converted into slide-by-slide Markdown. Vector storage is segregated into `nlp_course_kb` (885 lecture chunks) and `instructor_eval_kb` (28 exam chunks) using `qwen3-embedding:4b` with cosine similarity thresholding (`min_similarity = 0.50`), completely preventing exam answer leakage.
+* **Corpus Processing & Tri-Collection Segregation:** All **15 official lecture slide decks**, the master textbook (**Jurafsky & Martin SLP3, 646 pages**), **4 landmark research papers** (Attention, BERT, LoRA, Word2Vec), and **4 official exams/quizzes** were parsed and indexed into ChromaDB. Storage is segregated into 3 collections: `nlp_course_kb` (885 lecture chunks), `reference_kb` (375 textbook/paper chunks), and `instructor_eval_kb` (28 exam chunks) using `qwen3-embedding:4b` with cosine similarity thresholding (`min_similarity = 0.50`), completely preventing exam answer leakage while enabling deep textbook grounding.
 * **Core Adaptivity & Learner Engine (Deliverable Milestone):** Built a persistent **Bayesian Knowledge Tracing (BKT)** engine in `src/learner/mastery.py` and SQLite WAL persistence in `src/learner/db.py`. Tracks student topic mastery probabilities ($P(L_t)$), slip ($s$), guess ($g$), and transition ($T$) rates across a 12-topic prerequisite graph, generating personalized practice recommendations.
 * **Deliverable 2 Completed (Code Autograder & Security Sandbox):** Hardened `src/evaluator/sandbox_runner.py` with static Abstract Syntax Tree (AST) security analysis (blocking dangerous imports and execution exploits), 6.0s timeout enforcement, and deterministic JSON results across 3 curriculum labs:
   1. *Assignment 1:* BPE Tokenizer (`task_01_bpe.py`).
@@ -23,7 +23,8 @@ Over the course of the architectural overhaul sprints (Phases 1 through 4), the 
 * **Deliverable 4 Completed (Production Full-Stack Web Platform):** Deployed a modern, high-performance web platform:
   1. *FastAPI Backend (`http://localhost:8000`):* 14 REST endpoints, SSE streaming, multi-turn conversational memory, learner profile/recommendations, and interactive OpenAPI docs at `/docs`.
   2. *Modern React + TypeScript + Tailwind UI (`http://localhost:3000` / `:8000`):* Features KaTeX math rendering, Perplexity-style slide citation modals, interactive MCQ cards with confetti, rubric scorecards, and an embedded **Monaco Editor** for live PyTorch lab testing.
-* **Deliverable 1 & 3 Foundations (Standardized SFT & Benchmark Harness):** Corrected the nucleus sampling ($p=0.92$) calculation bug, standardized datasets into standard Chat (`messages`) and Alpaca formats with train/val splits (`validate_sft_dataset.py`), and established an automated 4-track model benchmarking harness (`src/evaluator/benchmark.py`) with a verified **90.9% baseline score** on `qwen3.5:latest` (`docs/BENCHMARK_REPORT.md`).
+* **Deliverable 1 & 3 Foundations (Audited SFT & Benchmark Harness):** Purged synthetic boilerplate and assembled an authentic, zero-hallucination curriculum dataset (79 verified records with 0% placeholders, 100% AST pass rate, and Python-verified math across 60 exercises, 9 derivations, 7 code fixes, and 3 rubrics). Standardized into ChatML and Alpaca schemas with an 80/20 train/val split (63/16 pairs) and established an automated 4-track benchmark harness (`src/evaluator/benchmark.py`) with a verified **90.9% baseline score** on `qwen3.5:latest` (`docs/BENCHMARK_REPORT.md`).
+* **Team Data Guide Published:** Complete architecture and usage guide documented in **[`docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md`](DATA_ARCHITECTURE_AND_USAGE_GUIDE.md)**.
 * **Test Suite Verification:** 36 automated unit tests passing in $< 5.0$s across `tests/`.
 
 ---
@@ -35,11 +36,12 @@ Use this script during your team synchronization meeting:
 > *"Hey everyone! We have made massive engineering progress on our NLP Adaptive Learning System and resolved the fundamental architectural gaps identified in our initial audit.*
 >
 > *Here is what is currently working live on our local stack:*
-> 1. *We have a **Dual-Collection Vector Store** in ChromaDB that segregates student course materials (885 slides) from instructor exam solutions (28 items), with cosine similarity thresholding at 0.50. This means the tutor grounds answers strictly in lectures and abstains from off-syllabus queries without ever leaking exam answer keys.*
+> 1. *We have a **Tri-Collection Vector Store** in ChromaDB that indexes all 15 lectures (885 slides), 12 textbook chapters from Jurafsky & Martin (309 chunks), and 4 landmark papers (66 chunks) totaling 1,288 vectors, while strictly segregating instructor exam solutions (28 items) to prevent any exam leaks.*
 > 2. *We built an **Adaptive Learner Engine** backed by SQLite with Write-Ahead Logging and Bayesian Knowledge Tracing. The system actively models each student's mastery across 12 NLP topics, respects prerequisite relationships, and dynamically serves tailored quiz recommendations.*
 > 3. *Our **Code Execution Sandbox** is now fully hardened with AST-level static security checks, memory/timeout protection, and deterministic JSON grading for our 3 PyTorch/NLP lab assignments.*
 > 4. *Our **Full-Stack Web Platform** (FastAPI + React 18 + Tailwind + Monaco Editor + KaTeX) compiles cleanly with zero errors and supports multi-turn conversational memory, interactive quiz testing, and rubric scoring.*
-> 5. *We fixed the nucleus sampling bug in our SFT dataset, converted all data into standard Chat and Alpaca schemas with train/val splits, and established an automated model benchmark harness where Qwen 3.5 scores 90.9%.*
+> 5. *We purged all synthetic boilerplate from our SFT dataset and established an authentic 79-item curriculum dataset (100% AST pass, verified Python math, 0% placeholders) with ChatML/Alpaca exports and an automated benchmark harness where Qwen 3.5 scores 90.9%.*
+> 6. *We published **`docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md`** so everyone on the team can understand the data pipeline, who consumes each file, and how the deterministic and agent components work.*
 >
 > *(Show a quick live demo: run `python3 -m pytest tests/` to show all 36 tests passing in 4.5 seconds, open the React app, ask a question to show grounded slide citations, run an adaptive quiz, and execute a PyTorch lab).*
 >

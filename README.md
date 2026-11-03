@@ -9,8 +9,8 @@ The platform functions as an autonomous technical tutor, curriculum-calibrated e
 ## 🌟 Key Platform Features
 
 1. **💬 AI Course Tutor Chat:**
-   - Grounded in 15 official lecture slide decks (Chapters 01–19) and exam answer keys.
-   - Interactive slide citations `[Chapter 09_The Transformer, Slide 29]` with live slide inspector previews.
+   - Grounded in 15 official lecture slide decks (Chapters 01–19), Jurafsky & Martin (SLP3), and landmark research papers (Attention, BERT, LoRA, Word2Vec).
+   - Interactive slide & textbook citations `[Chapter 09_The Transformer, Slide 29]` with live inspector previews.
    - Native LaTeX / KaTeX rendering for formal derivations ($\text{Attention}(Q,K,V)$).
 
 2. **📝 Dynamic Quiz & Exam Lab:**
@@ -29,8 +29,8 @@ The platform functions as an autonomous technical tutor, curriculum-calibrated e
    - Real-time test output and automated AI diagnostic feedback identifying tensor shape mismatches and masking bugs.
 
 5. **🔍 ChromaDB Vector Knowledge Explorer:**
-   - Direct search interface across 913 semantic slide chunks.
-   - Filter by chapter, inspect cosine relevance percentages, and read raw slide excerpts.
+   - Direct search interface across 1,288 semantic chunks (3 segregated collections: `nlp_course_kb`, `reference_kb`, `instructor_eval_kb`).
+   - Filter by chapter, inspect cosine relevance percentages, and read raw slide & textbook excerpts.
 
 ---
 
@@ -89,14 +89,17 @@ nlp-project/
 │       ├── extract_pdfs.py         # Batch PDF extractor (lecture slides & exams)
 │       └── build_sft_datasets.py   # Synthesizer for fine-tuning datasets
 ├── data/
-│   ├── raw/                        # Original slide PDFs, exams, and notebooks
+│   ├── raw/                        # Official slide PDFs, SLP3 textbook, research papers, exams
 │   ├── processed/
-│   │   ├── markdown/               # Slide-by-slide markdown files
-│   │   └── chunks/                 # 913 JSON slide chunks
-│   ├── chroma_db/                  # Persistent ChromaDB vector database
-│   └── sft/                        # Supervised Fine-Tuning datasets (.jsonl)
+│   │   ├── markdown/               # Sanitized slide, textbook, paper, and exam markdown
+│   │   └── chunks/                 # 1,288 indexed chunks (course_chunks & reference_chunks)
+│   ├── chroma_db/                  # Persistent ChromaDB vector database (3 collections)
+│   ├── sft/                        # Supervised Fine-Tuning datasets (.jsonl, ChatML & Alpaca)
+│   └── learning_state.db           # SQLite database for Bayesian Knowledge Tracing
 ├── docs/
+│   ├── DATA_ARCHITECTURE_AND_USAGE_GUIDE.md     # Complete data & pipeline guide for team
 │   ├── PROJECT_DELIVERABLES_AND_SPECIFICATION.md # Comprehensive technical specifications
+│   ├── PROGRESS_AND_COMPLETED_WORK_SUMMARY.md    # Completed work & architectural audit
 │   └── TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md   # Meeting pitch & 5-person roadmap
 ├── run.sh                          # Unified one-command launch script
 ├── requirements.txt                # Python dependencies
@@ -143,6 +146,7 @@ If you are developing or modifying the React UI:
 
 ## 👥 Team Collaboration Reference
 
-For full project requirements, architectural specs, and task breakdowns, refer to:
-* **[`docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md`](docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md)**
-* **[`docs/TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md`](docs/TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md)**
+For full project requirements, architectural specs, and data guides, refer to:
+* **[`docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md`](docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md)** — **(Must Read)** Complete data pipeline, usage breakdown, and data inventory
+* **[`docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md`](docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md)** — Comprehensive technical specifications
+* **[`docs/TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md`](docs/TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md)** — Team meeting pitch & 5-person roadmap

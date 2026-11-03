@@ -18,9 +18,10 @@ Over the course of the architectural hardening and implementation sprints (Phase
 ┌─────────────────────────────────┬────────────────────────────────────────┬──────────────────────┐
 │ Component                       │ Technical Implementation               │ Operational Status   │
 ├─────────────────────────────────┼────────────────────────────────────────┼──────────────────────┤
-│ 1. Raw Course Corpus            │ 15 Slide Decks + 4 Exams + LaTeX Clean │ COMPLETED & VERIFIED │
-│ 2. Dual Vector Knowledge Base   │ Segregated Collections in ChromaDB     │ COMPLETED & VERIFIED │
+│ 1. Raw Course & Reference Corpus│ 15 Slides + SLP3 Textbook + 4 Papers   │ COMPLETED & VERIFIED │
+│ 2. Tri-Collection Vector Store  │ 3 Segregated Collections in ChromaDB   │ COMPLETED & VERIFIED │
 │    - Student Course KB          │ 885 Lecture Chunks (nlp_course_kb)     │ Min Similarity = 0.50│
+│    - Reference Knowledge Base   │ 375 Book/Paper Chunks (reference_kb)   │ Tier-2 Deep Search   │
 │    - Instructor Eval KB         │ 28 Exam Solutions (instructor_eval_kb) │ Zero Exam Leakage    │
 │ 3. Learner & Mastery Engine     │ Bayesian Knowledge Tracing (BKT)       │ COMPLETED & VERIFIED │
 │    - Skill Mastery Model        │ P(L_t) updates with slip/guess weights │ Prerequisite Tree (12)│
@@ -28,11 +29,11 @@ Over the course of the architectural hardening and implementation sprints (Phase
 │ 4. Code Execution Sandbox       │ Subprocess + AST Static Analysis Guard │ COMPLETED & VERIFIED │
 │    - Security Isolation         │ Blocks dangerous imports, eval, fork   │ 6.0s Subprocess Kill │
 │    - 3 Curriculum Labs          │ BPE Tokenizer, Attention, Perplexity   │ 100% Pass Determinism│
-│ 5. SFT Dataset & Benchmark      │ Chat & Alpaca Schemas + Train/Val Split│ COMPLETED & VERIFIED │
-│    - Quality Assurance          │ AST syntax check + LaTeX delimiter bal │ Top-p Math Fix       │
+│ 5. Verified SFT Dataset (Zero-H)│ 79 Audited Pairs (Train: 63, Val: 16)  │ COMPLETED & VERIFIED │
+│    - Quality Assurance          │ 100% AST syntax check + LaTeX verified │ 0% Synthetic Boilerp.│
 │    - Benchmark Harness          │ 4-Track Automated Evaluation Harness   │ 90.9% Score (Qwen3.5)│
 │ 6. FastAPI Backend              │ 14 REST Endpoints + SSE Streaming      │ RUNNING (Port 8000)  │
-│ 7. Modern Web Application       │ React 18 + Tailwind + Monaco + KaTeX   │ BUILT (0 Errors, 1.4s│
+│ 7. Modern Web Application       │ React 18 + Tailwind + Monaco + KaTeX   │ BUILT (0 Errors, 1.4s)│
 │ 8. Automated Test Suite         │ 36 Comprehensive PyTest Unit Tests     │ 36 / 36 PASSED (4.5s)│
 └─────────────────────────────────┴────────────────────────────────────────┴──────────────────────┘
 ```
@@ -111,6 +112,31 @@ To move beyond a static RAG chatbot into a true **Adaptive Learning System**, a 
     3. Rubric Grading Schema Compliance & Arithmetic Concordance
     4. Retrieval Grounding & Out-of-Domain Abstention
   * Executed benchmark on `qwen3.5:latest` and published [`docs/BENCHMARK_REPORT.md`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/docs/BENCHMARK_REPORT.md) (**90.9% Pass Rate**, 10/11 checks passed).
+
+---
+
+### Phase 5: Reference Material Ingestion & Tri-Collection Hierarchical RAG
+* **Corpus Expansion:**
+  * Ingested master textbook `jurafsky_martin_slp3.pdf` (26.5 MB, 646 pages) and 4 landmark research papers (`vaswani2017_attention.pdf`, `devlin2018_bert.pdf`, `hu2021_lora.pdf`, `mikolov2013_word2vec.pdf`).
+  * Built `src/data_processing/extract_reference_materials.py` to selectively extract the 12 syllabus chapters and 4 papers into sanitized UTF-8 markdown.
+* **Tri-Collection RAG Indexing:**
+  * Implemented `src/rag/reference_chunker.py` and indexed 375 reference chunks into ChromaDB under `reference_kb`.
+  * Total vector store: **1,288 indexed vectors** across 3 segregated collections (`nlp_course_kb`: 885, `reference_kb`: 375, `instructor_eval_kb`: 28).
+  * Implemented `retrieve_hierarchical()` in `src/rag/retriever.py` to seamlessly blend primary slide citations with deep textbook references without leaking exam answers.
+
+---
+
+### Phase 6: Zero-Hallucination SFT Dataset Rebuild & Data Architecture Guide
+* **Authentic Dataset Rebuild:**
+  * Removed synthetic placeholder generation and rebuilt the dataset strictly from official ENSIA course materials and verified Python arithmetic:
+    * 60 verified exercises (`exercise_bank.jsonl`)
+    * 9 formal mathematical derivations (`math_derivations.jsonl`)
+    * 7 runnable PyTorch code debugging challenges (`code_debugging.jsonl`)
+    * 3 official exam marking rubrics with granular point weights (`grading_rubrics.jsonl`)
+  * Validated 100% of records with `src/data_processing/validate_sft_dataset.py` (0% placeholders, 100% AST pass rate, 100% LaTeX balance).
+  * Generated standard ChatML (`nlp_sft_all_chat.jsonl`), Alpaca (`nlp_sft_all_alpaca.jsonl`), Train (63 pairs), and Val (16 pairs).
+* **Comprehensive Team Guide:**
+  * Authored **[`docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md)** explaining the complete data pipeline, deterministic vs agent usage, and an exhaustive data asset inventory.
 
 ---
 
