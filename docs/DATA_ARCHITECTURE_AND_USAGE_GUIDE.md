@@ -5,7 +5,7 @@
 **Institution:** National Higher School of Artificial Intelligence (ENSIA)  
 **Project:** Project 2 — Adaptive Learning System for the NLP Course  
 **Audience:** Team Members, Collaborators & Reviewers  
-**Document Version:** 1.0  
+**Document Version:** 1.0  ****
 
 ---
 
@@ -20,7 +20,7 @@ If you are wondering:
 - *"Is our dataset enough for LoRA training?"*
 
 This guide answers each question step-by-step so our entire team is aligned and ready to explain the project during technical presentations and milestone defenses.
-
+****
 ---
 
 ## 2. The Big Picture: Offline Training vs. Online Runtime
