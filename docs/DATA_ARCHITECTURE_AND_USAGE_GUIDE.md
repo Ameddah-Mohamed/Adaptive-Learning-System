@@ -6,7 +6,6 @@
 **Project:** Project 2 — Adaptive Learning System for the NLP Course  
 **Audience:** Team Members, Collaborators & Reviewers  
 **Document Version:** 1.0  
-**Date:** November 3, 2026  
 
 ---
 
@@ -28,34 +27,26 @@ This guide answers each question step-by-step so our entire team is aligned and 
 
 In this system, data does **not** sit in a single folder doing only one job. Instead, our data flows into **two fundamentally separate pipelines**:
 
+```mermaid
+flowchart TD
+    Assets["<b>OUR DATA ASSETS</b><br/>(Lectures, Textbook, Papers, Exams, Code, Derivations)"]
+
+    subgraph Offline ["OFFLINE PIPELINE (Before User Arrives)"]
+        LoRA["<b>LoRA Fine-Tuning</b><br/><i>(Hugging Face / PEFT)</i><br/><br/><b>Reads:</b><br/>• <code>nlp_sft_train.jsonl</code><br/>• <code>nlp_sft_val.jsonl</code><br/><br/><b>Output:</b><br/>LoRA adapter weights (<code>adapter_model.safetensors</code>)<br/><br/><b>Does Agent Run Here?</b><br/>❌ <b>NO</b> — Standard gradient backpropagation"]
+    end
+
+    subgraph Online ["ONLINE PIPELINE (Live User Session)"]
+        Platform["<b>Interactive Web Platform</b><br/><i>(FastAPI + ChromaDB)</i><br/><br/><b>Reads:</b><br/>• ChromaDB (1,288 chunks)<br/>• <code>exercise_bank.jsonl</code><br/>• <code>grading_rubrics.jsonl</code><br/>• <code>code_debugging.jsonl</code><br/><br/><b>Output:</b><br/>Grounded tutor chat, tests, rubric grading, code tests<br/><br/><b>Does Agent Run Here?</b><br/>✅ <b>YES</b> — Hybrid Agent + Python Engine"]
+    end
+
+    Assets --> Offline
+    Assets --> Online
 ```
-                               ┌────────────────────────────────────────────────────────┐
-                               │                     OUR DATA ASSETS                    │
-                               │  (Lectures, Textbook, Papers, Exams, Code, Derivations)│
-                               └────────────────────────────────────────────────────────┘
-                                              │                        │
-                              OFFLINE PIPELINE                         ONLINE PIPELINE
-                           (Before the User Arrives)                (Live User Session)
-                                      │                                        │
-                                      ▼                                        ▼
-                       ┌─────────────────────────────┐          ┌─────────────────────────────┐
-                       │     LoRA Fine-Tuning        │          │    Interactive Web Platform │
-                       │    (Hugging Face / PEFT)    │          │      (FastAPI + ChromaDB)   │
-                       │                             │          │                             │
-                       │  Reads:                     │          │  Reads:                     │
-                       │  - nlp_sft_train.jsonl      │          │  - ChromaDB (1,288 chunks)  │
-                       │  - nlp_sft_val.jsonl        │          │  - exercise_bank.jsonl      │
-                       │                             │          │  - grading_rubrics.jsonl    │
-                       │  Output:                    │          │  - code_debugging.jsonl     │
-                       │  LoRA adapter weights       │          │                             │
-                       │  (adapter_model.safetensors)│          │  Output:                    │
-                       │                             │          │  Grounded tutor chat, tests,│
-                       │  Does the Agent run here?   │          │  rubric grading, code tests │
-                       │  NO. This is standard       │          │                             │
-                       │  gradient backpropagation.  │          │  Does the Agent run here?   │
-                       │                             │          │  YES. Hybrid Agent + Python │
-                       └─────────────────────────────┘          └─────────────────────────────┘
-```
+
+| Pipeline | Timing | Core Stack | Input Data Assets | Primary Output | Agent Active? |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Offline Pipeline** | Pre-deployment | Hugging Face / PEFT | `nlp_sft_train.jsonl`, `nlp_sft_val.jsonl` | LoRA Adapter (`adapter_model.safetensors`) | **No** (Standard backpropagation) |
+| **Online Pipeline** | Live session | FastAPI + ChromaDB | ChromaDB (1,288 chunks), `exercise_bank.jsonl`, `grading_rubrics.jsonl`, `code_debugging.jsonl` | Grounded tutor responses, quiz generation, rubric grading | **Yes** (Hybrid Agent + Python sandbox) |
 
 ---
 
