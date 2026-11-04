@@ -35,9 +35,9 @@ def test_code_syntax_checker():
 
 def test_sft_compilation_and_splits():
     report = compile_and_validate_all_datasets(SFT_DIR)
-    assert report["valid_count"] == 79
-    assert report["train_count"] == 63
-    assert report["val_count"] == 16
+    assert report["valid_count"] == 300
+    assert report["train_count"] == 240
+    assert report["val_count"] == 60
     assert len(report["errors"]) == 0
 
     # Verify generated files exist
@@ -55,7 +55,7 @@ def test_chat_format_structure():
     with open(train_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
-    assert len(lines) == 63
+    assert len(lines) == 240
     for line in lines:
         data = json.loads(line)
         assert "id" in data

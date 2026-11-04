@@ -147,6 +147,7 @@ If you are developing or modifying the React UI:
 ## 👥 Team Collaboration Reference
 
 For full project requirements, architectural specs, and data guides, refer to:
-* **[`docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md`](docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md)** — **(Must Read)** Complete data pipeline, usage breakdown, and data inventory
+* **[`docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md`](docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md)** — **(Team Action Guide)** Exact module assignments and which data files to use
+* **[`docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md`](docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md)** — **(Data Architecture)** Complete data pipeline, usage breakdown, and data inventory
 * **[`docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md`](docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md)** — Comprehensive technical specifications
 * **[`docs/TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md`](docs/TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md)** — Team meeting pitch & 5-person roadmap

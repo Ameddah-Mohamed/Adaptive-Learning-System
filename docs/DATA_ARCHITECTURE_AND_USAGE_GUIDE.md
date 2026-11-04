@@ -67,10 +67,10 @@ These files are used **offline** to train the LoRA adapter before deployment.
 
 ```
 data/sft/
-├── nlp_sft_train.jsonl        (63 curriculum pairs — Training split)
-├── nlp_sft_val.jsonl          (16 curriculum pairs — Validation split)
-├── nlp_sft_all_chat.jsonl     (79 pairs — ShareGPT / ChatML standard schema)
-└── nlp_sft_all_alpaca.jsonl   (79 pairs — Alpaca instruction standard schema)
+├── nlp_sft_train.jsonl        (240 curriculum pairs — Training split: 80%)
+├── nlp_sft_val.jsonl          (60 curriculum pairs — Validation split: 20%)
+├── nlp_sft_all_chat.jsonl     (300 pairs — ShareGPT / ChatML standard schema)
+└── nlp_sft_all_alpaca.jsonl   (300 pairs — Alpaca instruction standard schema)
 ```
 
 #### 1. `nlp_sft_train.jsonl` (63 verified pairs)
@@ -109,10 +109,10 @@ These four files contain the raw, verified domain knowledge that fuels both the 
 
 ```
 data/sft/
-├── exercise_bank.jsonl        (60 items — Exam questions, Laplace smoothing, Perplexity, CKY)
-├── math_derivations.jsonl     (9 proofs — Attention variance, Word2Vec SGNS, LoRA math)
-├── code_debugging.jsonl       (7 modules — PyTorch attention transpose, loss, masks)
-└── grading_rubrics.jsonl      (3 rubrics — Official exam marking criteria with point weights)
+├── exercise_bank.jsonl        (271 items — Exam questions, Laplace smoothing, Perplexity, CKY, Viterbi, BM25)
+├── math_derivations.jsonl     (11 proofs — Attention variance, Word2Vec SGNS, LoRA math, CKY, Softmax)
+├── code_debugging.jsonl       (10 modules — PyTorch attention transpose, causal mask, loss, LayerNorm eps)
+└── grading_rubrics.jsonl      (8 rubrics — Official exam marking criteria with point weights)
 ```
 
 #### 4. `exercise_bank.jsonl` (60 items)
@@ -209,13 +209,19 @@ data/chroma_db/                (Persistent ChromaDB vector store — 28.8 MB sql
 3. All PyTorch code challenges were verified with `ast.parse()` to ensure $0$ syntax errors.
 4. The pedagogical explanations and rubric descriptions were structured with LLM assistance directly grounded in the course materials.
 
-### Q2: "Is 79 SFT examples enough? Shouldn't we have 1,000+ examples?"
-In modern LLM instruction tuning, **quality dramatically outperforms quantity**.
-- Meta's landmark research paper **LIMA** (*Less Is More for Alignment*) proved that **60 to 100 dense, mathematically flawless instruction pairs** are superior to 1,000+ generic or hallucinated synthetic examples.
-- When teams mass-generate 1,000+ synthetic QA pairs with automated prompts, the dataset inevitably contains hallucinated formulas, broken PyTorch arguments, and repetitive phrasing that causes the base model to lose reasoning ability (**catastrophic forgetting**).
-- Our 79 pairs cover every core curriculum topic with zero placeholders, validated LaTeX math, and runnable PyTorch code.
+### Q2: "Is our SFT dataset balanced and sufficient for LoRA training?"
+**Yes.** The dataset contains **300 verified curriculum pairs** (240 train / 60 val) spanning every single lecture chapter:
+- Meta's landmark research paper **LIMA** (*Less Is More for Alignment*) proved that dense, mathematically flawless instruction pairs are dramatically superior to mass-generated synthetic templates.
+- Our 300 pairs provide comprehensive coverage of all 15 course chapters with 0% synthetic placeholders, 100% AST pass rate, and verified Python arithmetic.
 
-### Q3: "Does the frontend React app read the JSON files directly?"
+---
+
+### Q3: "Where can my teammates find their module tasks and data hand-off?"
+Refer directly to **[`docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md`](file:///Users/lmouh/Desktop/ensia/4y/nlp/project/docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md)** for a breakdown of which team member uses which data file and what modules they are assigned to build.
+
+---
+
+### Q4: "Does the frontend React app read the JSON files directly?"
 **No.** The frontend React application communicates strictly with the **FastAPI backend** over HTTP REST and Server-Sent Events (SSE). The backend loads the data, interacts with ChromaDB, runs the sandbox, and invokes Ollama LLMs.
 
 ---
@@ -234,14 +240,14 @@ Below is the complete inventory of all data assets currently active in the repos
 | **`data/processed/chunks/`** | `course_chunks.json` | JSON | 1.2 MB | 913 chunks | Course slide and exam chunks with slide metadata and chapter tags. |
 | **`data/processed/chunks/`** | `reference_chunks.json` | JSON | 2.3 MB | 375 chunks | Textbook and research paper chunks for secondary reference retrieval. |
 | **`data/chroma_db/`** | ChromaDB SQLite & HNSW index | Vector DB | 28.8 MB | 1,288 vectors | 3 segregated collections indexed with `qwen3-embedding:4b` for RAG. |
-| **`data/sft/`** | `exercise_bank.jsonl` | JSONL | 46 KB | 60 items | Verified computational and conceptual exercises for Quiz tab & SFT. |
-| **`data/sft/`** | `math_derivations.jsonl` | JSONL | 21 KB | 9 proofs | Rigorous mathematical derivations with validated LaTeX formulas. |
-| **`data/sft/`** | `code_debugging.jsonl` | JSONL | 9.8 KB | 7 modules | PyTorch implementation challenges with AST-verified bug fixes. |
-| **`data/sft/`** | `grading_rubrics.jsonl` | JSONL | 5.3 KB | 3 rubrics | Official exam grading rubrics with granular point weights for auto-grader. |
-| **`data/sft/`** | `nlp_sft_train.jsonl` | JSONL | 85 KB | 63 pairs | Training split (80%) for PEFT / LoRA fine-tuning. |
-| **`data/sft/`** | `nlp_sft_val.jsonl` | JSONL | 23 KB | 16 pairs | Held-out validation split (20%) for LoRA loss and perplexity tracking. |
-| **`data/sft/`** | `nlp_sft_all_chat.jsonl` | JSONL | 108 KB | 79 pairs | Full dataset in ShareGPT / ChatML standard format. |
-| **`data/sft/`** | `nlp_sft_all_alpaca.jsonl` | JSONL | 83 KB | 79 pairs | Full dataset in Alpaca instruction standard format. |
+| **`data/sft/`** | `exercise_bank.jsonl` | JSONL | ~200 KB | 271 items | Verified computational and conceptual exercises for Quiz tab & SFT. |
+| **`data/sft/`** | `math_derivations.jsonl` | JSONL | 25 KB | 11 proofs | Rigorous mathematical derivations with validated LaTeX formulas. |
+| **`data/sft/`** | `code_debugging.jsonl` | JSONL | 15 KB | 10 modules | PyTorch implementation challenges with AST-verified bug fixes. |
+| **`data/sft/`** | `grading_rubrics.jsonl` | JSONL | 12 KB | 8 rubrics | Official exam grading rubrics with granular point weights for auto-grader. |
+| **`data/sft/`** | `nlp_sft_train.jsonl` | JSONL | ~320 KB | 240 pairs | Training split (80%) for PEFT / LoRA fine-tuning. |
+| **`data/sft/`** | `nlp_sft_val.jsonl` | JSONL | ~80 KB | 60 pairs | Held-out validation split (20%) for LoRA loss and perplexity tracking. |
+| **`data/sft/`** | `nlp_sft_all_chat.jsonl` | JSONL | ~400 KB | 300 pairs | Full dataset in ShareGPT / ChatML standard format. |
+| **`data/sft/`** | `nlp_sft_all_alpaca.jsonl` | JSONL | ~310 KB | 300 pairs | Full dataset in Alpaca instruction standard format. |
 | **`data/`** | `learning_state.db` | SQLite WAL | 61 KB | 5 tables | Bayesian Knowledge Tracing student mastery tracking and history. |
 
 ---
