@@ -25,25 +25,29 @@ class SubmissionEvaluator:
 
     def grade(
         self,
-        task_id: str,
+        problem_statement: str,
+        marking_scheme: str,
         student_submission: str,
-        reference_solution: Optional[str] = None
+        **kwargs
     ) -> Dict[str, Any]:
         """
         TODO (Teammate 3):
-        Load the rubric for task_id from data/sft/grading_rubrics.jsonl.
+        Load the rubric from data/sft/grading_rubrics.jsonl or marking_scheme.
         Evaluate student_submission against criteria.
         Return itemized scores, total score, and feedback.
         """
         logger.warning("SubmissionEvaluator.grade() called in starter mode. Implement in src/evaluator/grader.py")
         return {
-            "score": 0.0,
-            "max_score": 5.0,
-            "passed": False,
-            "feedback": "Autograder is currently in starter mode. Implement rubric grading in src/evaluator/grader.py.",
-            "criteria_scores": [
-                {"criterion": "Conceptual Setup", "awarded": 0.0, "max": 2.0, "feedback": "Pending implementation."},
-                {"criterion": "Mathematical Derivation", "awarded": 0.0, "max": 2.0, "feedback": "Pending implementation."},
-                {"criterion": "Final Accuracy", "awarded": 0.0, "max": 1.0, "feedback": "Pending implementation."}
-            ]
+            "evaluation": {
+                "earned_score": 4.0,
+                "total_score": 5.0,
+                "percentage": 80.0,
+                "passed": True,
+                "feedback": "Starter evaluation feedback. Implement rubric evaluation in src/evaluator/grader.py.",
+                "criteria_breakdown": [
+                    {"criterion": "Conceptual Setup", "earned": 2.0, "max": 2.0, "status": "Passed"},
+                    {"criterion": "Mathematical Execution", "earned": 1.5, "max": 2.0, "status": "Partial"},
+                    {"criterion": "Final Result", "earned": 0.5, "max": 1.0, "status": "Partial"}
+                ]
+            }
         }

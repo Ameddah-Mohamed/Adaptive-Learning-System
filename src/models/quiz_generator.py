@@ -30,22 +30,27 @@ class QuizGenerator:
 
     def generate_exercise(
         self,
-        topic: str,
+        topic: Optional[str] = None,
         difficulty: str = "intermediate",
-        ex_type: str = "mcq"
+        question_type: str = "mcq",
+        chapter: Optional[int] = None,
+        **kwargs
     ) -> Dict[str, Any]:
         """
         TODO (Teammate 4):
-        Query data/sft/exercise_bank.jsonl for matching exercises on `topic`,
+        Query data/sft/exercise_bank.jsonl for matching exercises on `topic` or `chapter`,
         or prompt LLM to generate an exercise adhering to the official syllabus.
         """
-        logger.warning(f"QuizGenerator.generate_exercise('{topic}') called in starter mode.")
+        chosen_topic = topic or "Language Modeling"
+        chosen_chapter = chapter or 3
+        logger.warning(f"QuizGenerator.generate_exercise('{chosen_topic}') called in starter mode.")
         return {
             "id": "STARTER-EX-01",
-            "topic": topic,
+            "chapter": chosen_chapter,
+            "topic": chosen_topic,
             "difficulty": difficulty,
-            "type": ex_type,
-            "question": f"Starter placeholder question on {topic}. Implement generator in src/models/quiz_generator.py.",
+            "type": question_type,
+            "question": f"Starter placeholder question on {chosen_topic} (Chapter {chosen_chapter}). Implement generator in src/models/quiz_generator.py.",
             "options": {
                 "A": "Option A (Pending implementation)",
                 "B": "Option B (Pending implementation)",

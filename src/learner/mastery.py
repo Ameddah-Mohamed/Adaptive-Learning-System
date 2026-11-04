@@ -40,24 +40,39 @@ class LearnerEngine:
         TODO (Teammate 4): Recommend next practice topic based on prerequisite mastery graph.
         """
         return {
-            "topic": "Language Modeling",
-            "difficulty": "intermediate",
+            "topic": "The Transformer",
+            "chapter": 9,
+            "recommended_difficulty": "intermediate",
             "reason": "Starter recommendation. Implement BKT graph traversal in src/learner/mastery.py."
         }
 
-    def update_from_quiz_attempt(self, student_id: str, topic: str, is_correct: bool) -> Dict[str, Any]:
+    def update_from_quiz_attempt(
+        self,
+        student_id: str,
+        topic: str,
+        is_correct: bool,
+        chapter: Optional[int] = None,
+        score: Optional[float] = None,
+        max_score: Optional[float] = 1.0,
+        **kwargs
+    ) -> Dict[str, Any]:
         """
         TODO (Teammate 4): Apply BKT update formula on quiz attempt.
         """
-        return {"topic": topic, "new_mastery": 0.5}
+        return {
+            "topic": topic,
+            "chapter": chapter or 3,
+            "new_mastery": 0.55 if is_correct else 0.45,
+            "prior_mastery": 0.50
+        }
 
-    def update_from_code_run(self, student_id: str, task_name: str, passed: bool) -> Dict[str, Any]:
+    def update_from_code_run(self, student_id: str, task_id: Optional[str] = None, passed_tests: int = 0, total_tests: int = 1, is_success: bool = False, **kwargs) -> Dict[str, Any]:
         """
         TODO (Teammate 4): Update mastery from code sandbox run.
         """
-        return {"task": task_name, "new_mastery": 0.5}
+        return {"task": task_id, "new_mastery": 0.55 if is_success else 0.45}
 
-    def update_from_grading_result(self, student_id: str, task_id: str, percentage: float) -> Dict[str, Any]:
+    def update_from_grading_result(self, student_id: str, task_id: Optional[str] = None, percentage: float = 0.0, **kwargs) -> Dict[str, Any]:
         """
         TODO (Teammate 4): Update mastery from rubric grading result.
         """

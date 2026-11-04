@@ -20,6 +20,12 @@ EVAL_COLLECTION = "instructor_eval_kb"
 REFERENCE_COLLECTION = "reference_kb"
 
 
+class DummyCollection:
+    """Starter dummy collection object for stats introspection."""
+    def count(self) -> int:
+        return 0
+
+
 class CourseRetriever:
     """Starter skeleton for Course Knowledge Retrieval."""
 
@@ -33,19 +39,22 @@ class CourseRetriever:
         self.collection_name = collection_name
         self.persist_dir = persist_dir
         self.min_similarity = min_similarity
+        self.collection = DummyCollection()
         logger.info(f"CourseRetriever initialized on '{collection_name}' in STARTER mode. (Teammate 1 Task)")
 
     def retrieve(
         self,
         query: str,
-        collection_name: str = LECTURE_COLLECTION,
+        collection_name: Optional[str] = None,
         top_k: int = 3,
-        chapter_filter: Optional[int] = None
+        chapter: Optional[int] = None,
+        chapter_filter: Optional[int] = None,
+        **kwargs
     ) -> List[Dict[str, Any]]:
         """
         TODO (Teammate 1):
         Query ChromaDB collection using cosine similarity.
-        Filter by chapter if chapter_filter is provided.
+        Filter by chapter if chapter or chapter_filter is provided.
         Filter out results below self.min_similarity.
         """
         logger.warning("CourseRetriever.retrieve() called in starter mode. Implement in src/rag/retriever.py")
