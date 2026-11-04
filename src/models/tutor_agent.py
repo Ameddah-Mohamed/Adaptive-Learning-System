@@ -1,95 +1,36 @@
 """
-Interactive NLP Tutor Agent.
-Combines CourseRetriever with local Ollama LLM (qwen3.5:latest or llama3:latest)
-to provide grounded, LaTeX-rendered, and course-aligned tutoring.
+AI Course Tutor Agent Module.
+
+TODO for Teammate 1 / Team:
+1. Ingest user query and retrieve course slide context via CourseRetriever.
+2. Construct grounded prompt with slide citations and strict syllabus boundaries.
+3. Call local LLM (Ollama qwen3.5:latest or fine-tuned LoRA model) with streaming support.
+
+Refer to: docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md
 """
 
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
+import logging
 from typing import Dict, Any, List, Optional
-import ollama
-
 from src.rag.retriever import CourseRetriever
-from src.models.prompts import TUTOR_SYSTEM_PROMPT, TUTOR_USER_PROMPT
 
-
-DEFAULT_LLM = "qwen3.5:latest"
+logger = logging.getLogger(__name__)
 
 
 class NLPTutorAgent:
-    def __init__(self, model_name: str = DEFAULT_LLM, top_k_retrieval: int = 3):
+    """Starter skeleton for NLP Tutor Agent."""
+
+    def __init__(self, model_name: str = "qwen3.5:latest", top_k_retrieval: int = 3):
         self.model_name = model_name
         self.top_k = top_k_retrieval
         self.retriever = CourseRetriever()
+        logger.info("NLPTutorAgent initialized in STARTER mode.")
 
-    def ask(
-        self,
-        question: str,
-        chapter_filter: Optional[int] = None,
-        category_filter: Optional[str] = None,
-        use_reference: bool = True
-    ) -> Dict[str, Any]:
+    def answer_question(self, question: str) -> Dict[str, Any]:
         """
-        Ask a question to the NLP tutor.
-        Retrieves relevant course slides & textbook/paper references,
-        constructs a grounded prompt, and calls Ollama.
+        TODO: Retrieve context and generate grounded tutor response.
         """
-        # Step 1: Retrieve grounded context from ChromaDB (hierarchical: lectures + references)
-        if use_reference:
-            h_res = self.retriever.retrieve_hierarchical(
-                query=question,
-                lecture_top_k=self.top_k,
-                reference_top_k=2
-            )
-            retrieved_chunks = h_res["all"]
-        else:
-            retrieved_chunks = self.retriever.retrieve(
-                query=question,
-                top_k=self.top_k,
-                chapter=chapter_filter,
-                category=category_filter
-            )
-
-        context_str = self.retriever.format_context_for_prompt(retrieved_chunks)
-        
-        # Step 2: Format prompt
-        user_message = TUTOR_USER_PROMPT.format(
-            context=context_str if context_str else "*(No specific slides retrieved, rely on core NLP curriculum)*",
-            question=question
-        )
-        
-        # Step 3: Query Ollama LLM
-        messages = [
-            {"role": "system", "content": TUTOR_SYSTEM_PROMPT},
-            {"role": "user", "content": user_message}
-        ]
-        
-        response = ollama.chat(
-            model=self.model_name,
-            messages=messages,
-            options={"temperature": 0.2, "top_p": 0.9}
-        )
-        
-        reply_content = response["message"]["content"]
-        citations = [c["citation"] for c in retrieved_chunks]
-        
+        logger.warning("NLPTutorAgent.answer_question() called in starter mode.")
         return {
-            "question": question,
-            "answer": reply_content,
-            "citations": citations,
-            "retrieved_sources": retrieved_chunks
+            "answer": "The AI Tutor is currently in starter mode. Implement retrieval and response generation in src/models/tutor_agent.py.",
+            "citations": []
         }
-
-
-if __name__ == "__main__":
-    tutor = NLPTutorAgent()
-    sample_q = "Why do we divide by sqrt(d_k) in the Scaled Dot-Product Attention formula?"
-    print(f"Asking Tutor: '{sample_q}'\n")
-    res = tutor.ask(sample_q)
-    print("--- TUTOR RESPONSE ---")
-    print(res["answer"])
-    print("\n--- SOURCES CITED ---")
-    for cit in res["citations"]:
-        print(f" - {cit}")
