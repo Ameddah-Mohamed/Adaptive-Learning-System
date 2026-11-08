@@ -1,153 +1,163 @@
-# ENSIA NLP Adaptive Learning & Tutoring Platform
+# ENSIA NLP Adaptive Learning System
 
-An advanced adaptive learning system explicitly tailored for the **4th Year Natural Language Processing (NLP)** curriculum at the **National Higher School of Artificial Intelligence (ENSIA)**.
+An adaptive learning platform designed for the 4th Year Natural Language Processing (NLP) curriculum at the National Higher School of Artificial Intelligence (ENSIA).
 
-The platform functions as an autonomous technical tutor, curriculum-calibrated examiner, and automated code/theory evaluator powered by local open-weight models (`qwen3-embedding:4b`, `qwen3.5:latest`, `qwen2.5-coder:7b`).
-
----
-
-## 🌟 Key Platform Features
-
-1. **💬 AI Course Tutor Chat:**
-   - Grounded in 15 official lecture slide decks (Chapters 01–19), Jurafsky & Martin (SLP3), and landmark research papers (Attention, BERT, LoRA, Word2Vec).
-   - Interactive slide & textbook citations `[Chapter 09_The Transformer, Slide 29]` with live inspector previews.
-   - Native LaTeX / KaTeX rendering for formal derivations ($\text{Attention}(Q,K,V)$).
-
-2. **📝 Dynamic Quiz & Exam Lab:**
-   - On-demand generation across topics (Transformers, Language Modeling, Naive Bayes, CKY Parsing).
-   - Calibrated across 3 difficulty tiers (Beginner, Intermediate, Advanced) and 4 formats (MCQ, Calculation, Derivation, Coding).
-   - Interactive self-testing with instant correctness feedback, confetti celebration, and expandable instructor solutions/rubrics.
-
-3. **⚖️ Rubric Evaluator & Grader:**
-   - Pre-loaded with official ENSIA midterm and final exam questions.
-   - Automated assessment against instructor marking schemes with granular points breakdown.
-   - Visual KPI scorecard, criterion-by-criterion status (`Passed`, `Partial`, `Failed`), and personalized improvement tips.
-
-4. **💻 PyTorch Code Lab & Sandbox:**
-   - Built-in **Monaco Editor** (VS Code in the browser) with Python syntax highlighting and line numbers.
-   - Subprocess execution harness running automated `pytest` test suites in isolated sandbox environments.
-   - Real-time test output and automated AI diagnostic feedback identifying tensor shape mismatches and masking bugs.
-
-5. **🔍 ChromaDB Vector Knowledge Explorer:**
-   - Direct search interface across 1,288 semantic chunks (3 segregated collections: `nlp_course_kb`, `reference_kb`, `instructor_eval_kb`).
-   - Filter by chapter, inspect cosine relevance percentages, and read raw slide & textbook excerpts.
+The system integrates Retrieval-Augmented Generation (RAG), Bayesian Knowledge Tracing (BKT), Supervised Fine-Tuning (SFT/LoRA), and an AST-secured Python code sandbox to provide interactive tutoring, adaptive quizzing, and automated evaluation using local open-weight models.
 
 ---
 
-## 📁 Repository Structure
+## Core System Modules
+
+1. **Course Tutor Chat:**
+   - Grounded retrieval over 15 lecture slide decks, Jurafsky & Martin (Speech and Language Processing, 3rd ed.), and reference papers.
+   - Grounded citations with slide and section references.
+   - LaTeX/KaTeX mathematical formula rendering.
+
+2. **Adaptive Quiz Generator:**
+   - Topic-based question generation across 15 syllabus chapters.
+   - Calibrated across difficulty tiers (Beginner, Intermediate, Advanced).
+   - Instant feedback and detailed solutions.
+
+3. **Rubric Evaluator:**
+   - Automated grading of open-ended student submissions against official instructor marking schemes.
+   - Granular criteria scoring with itemized point breakdowns.
+
+4. **PyTorch Code Sandbox:**
+   - Web-based Monaco editor running in an isolated execution environment.
+   - Static AST security validation blocking unauthorized system calls and network imports.
+   - Automated test runner providing immediate diagnostic feedback.
+
+5. **Knowledge Base Explorer:**
+   - Direct query interface across vector collections (`nlp_course_kb`, `reference_kb`, `instructor_eval_kb`).
+   - Chapter filtering and cosine similarity score inspection.
+
+---
+
+## Repository Structure
 
 ```text
-nlp-project/
-├── backend/                        # FastAPI REST API & Streaming Server
+.
+├── backend/                        # FastAPI application & API endpoints
 │   ├── app/
-│   │   ├── main.py                 # FastAPI application & SPA static server
+│   │   ├── main.py                 # Application entry point and router configuration
 │   │   ├── core/
-│   │   │   └── config.py           # System settings, model names, and paths
+│   │   │   └── config.py           # Environment variables, model definitions, and paths
 │   │   └── api/
-│   │       ├── tutor.py            # /api/tutor/chat & SSE /chat/stream
-│   │       ├── quiz.py             # /api/quiz/generate
-│   │       ├── evaluator.py        # /api/evaluator/grade
-│   │       ├── sandbox.py          # /api/sandbox/tasks & /sandbox/run
-│   │       └── knowledge.py        # /api/knowledge/search & /stats
-│   └── __init__.py
-├── frontend/                       # Modern React + Vite + Tailwind CSS + Monaco UI
+│   │       ├── tutor.py            # /api/tutor/chat and streaming endpoints
+│   │       ├── quiz.py             # /api/quiz/generate and submission endpoints
+│   │       ├── evaluator.py        # /api/evaluator/grade rubric endpoint
+│   │       ├── sandbox.py          # /api/sandbox/tasks and code execution
+│   │       ├── knowledge.py        # /api/knowledge/search and stats endpoints
+│   │       └── learner.py          # /api/learner/mastery and recommendation endpoints
+├── frontend/                       # React 18, TypeScript, Tailwind CSS, Monaco editor
 │   ├── src/
-│   │   ├── main.tsx
 │   │   ├── App.tsx
-│   │   ├── index.css               # KaTeX & Tailwind styling
-│   │   ├── components/
-│   │   │   ├── Navbar.tsx          # Sleek navigation header with model indicator
-│   │   │   ├── TutorChatView.tsx   # Chatbot with KaTeX, slide citations & prompt chips
-│   │   │   ├── QuizView.tsx        # Dynamic quiz authoring & interactive MCQ cards
-│   │   │   ├── GraderView.tsx      # Split-screen rubric grader with KPI scorecards
-│   │   │   ├── CodeSandboxView.tsx # Monaco PyTorch editor & unit-test runner
-│   │   │   ├── KnowledgeView.tsx   # ChromaDB vector search & slide inspector
-│   │   │   └── MathRenderer.tsx    # Native KaTeX math & syntax-highlighted code
-│   │   └── lib/
-│   │       ├── api.ts              # Type-safe API client for FastAPI
-│   │       └── types.ts            # TypeScript interfaces
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── tailwind.config.js
-├── src/                            # Core NLP & Machine Learning Modules
-│   ├── rag/
-│   │   ├── slide_chunker.py        # Semantic slide parser & chunker
-│   │   ├── index_knowledge_base.py # ChromaDB indexer using qwen3-embedding:4b
-│   │   └── retriever.py            # Cosine-calibrated retriever with citations
-│   ├── models/
-│   │   ├── prompts.py              # System & task prompt templates
-│   │   ├── tutor_agent.py          # Grounded tutor reasoning engine
-│   │   └── quiz_generator.py       # Question & rubric synthesizer
-│   ├── evaluator/
-│   │   ├── grader.py               # Rubric-aligned submission grader
-│   │   ├── sandbox_runner.py       # Subprocess test runner with timeout protection
-│   │   └── coding_tasks/           # Official programming lab assignments
-│   │       ├── task_01_bpe.py      # BPE Tokenizer task & test suite
-│   │       ├── task_02_attention.py# PyTorch Attention task & test suite
-│   │       └── task_03_perplexity.py # Perplexity Calculator task & test suite
-│   └── data_processing/
-│       ├── extract_pdfs.py         # Batch PDF extractor (lecture slides & exams)
-│       └── build_sft_datasets.py   # Synthesizer for fine-tuning datasets
+│   │   ├── components/             # UI views for tutor, quiz, evaluator, sandbox, and explorer
+│   │   └── lib/                    # API client and TypeScript definitions
+│   └── package.json
+├── src/                            # Core algorithmic engine and data pipeline
+│   ├── rag/                        # Chunking, indexing, and ChromaDB retrieval
+│   ├── models/                     # LoRA training scripts, prompt templates, and quiz generator
+│   ├── evaluator/                  # Rubric grading logic, AST security validator, sandbox runner
+│   ├── learner/                    # Bayesian Knowledge Tracing (BKT) and SQLite state storage
+│   └── data_processing/            # PDF extraction and SFT dataset generation scripts
 ├── data/
-│   ├── raw/                        # Official slide PDFs, SLP3 textbook, research papers, exams
-│   ├── processed/
-│   │   ├── markdown/               # Sanitized slide, textbook, paper, and exam markdown
-│   │   └── chunks/                 # 1,288 indexed chunks (course_chunks & reference_chunks)
-│   ├── chroma_db/                  # Persistent ChromaDB vector database (3 collections)
-│   ├── sft/                        # Supervised Fine-Tuning datasets (.jsonl, ChatML & Alpaca)
-│   └── learning_state.db           # SQLite database for Bayesian Knowledge Tracing
-├── docs/
-│   ├── DATA_ARCHITECTURE_AND_USAGE_GUIDE.md     # Complete data & pipeline guide for team
-│   ├── PROJECT_DELIVERABLES_AND_SPECIFICATION.md # Comprehensive technical specifications
-│   ├── PROGRESS_AND_COMPLETED_WORK_SUMMARY.md    # Completed work & architectural audit
-│   └── TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md   # Meeting pitch & 5-person roadmap
-├── run.sh                          # Unified one-command launch script
+│   ├── raw/                        # Raw lecture slides, textbooks, exams, and papers
+│   ├── processed/                  # Sanitized markdown and pre-computed chunk files
+│   ├── sft/                        # 300 verified SFT dataset items (train, val, ChatML, Alpaca)
+│   ├── chroma_db/                  # Persistent ChromaDB vector database
+│   └── learning_state.db           # SQLite database for student progress tracking
+├── docs/                           # Technical documentation and team guides
+├── tests/                          # Automated test suite
 ├── requirements.txt                # Python dependencies
-└── .gitignore                      # Git ignore rules
+└── run.sh                          # Unified execution script
 ```
 
 ---
 
-## 🚀 Quick Start Guide
+## Model Setup
 
-### 1. Prerequisites
-Ensure you have:
-* Python 3.10+ (with Anaconda or standard venv)
-* Node.js v18+ and npm
-* [Ollama](https://ollama.ai) installed and running locally with:
-  ```bash
-  ollama pull qwen3-embedding:4b
-  ollama pull qwen3.5:latest
-  # Recommended for code & math:
-  ollama pull qwen2.5-coder:7b
-  ```
+The platform uses local models via Ollama for runtime inference and Hugging Face for fine-tuning.
 
-### 2. Install Python Dependencies
+### 1. Ollama Runtime Models
+
+Download the required models before launching:
+
+```bash
+# Vector embedding model for ChromaDB and RAG
+ollama pull qwen3-embedding:4b
+
+# Primary reasoning model for tutor chat, quiz, and evaluation
+ollama pull qwen3.5:latest
+```
+
+*Note: For systems with 8 GB RAM, `qwen2.5:3b` and `nomic-embed-text` can be used as lightweight alternatives.*
+
+### 2. Fine-Tuning Base Model
+
+For local LoRA fine-tuning (`src/models/train_lora.py`):
+- **Base model:** `Qwen/Qwen2.5-3B-Instruct`
+- Downloaded automatically via the Hugging Face `transformers` library during training execution.
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+- Python 3.10 or higher
+- Node.js v18 or higher with npm
+- Ollama running locally
+
+### 1. Install Backend Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Launch the Platform (One Command)
-Run the root launcher:
+### 2. Install Frontend Dependencies
 ```bash
-./run.sh
+cd frontend
+npm install
+cd ..
 ```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser. The unified backend serves both the FastAPI API endpoints and the built modern React UI.
-
-### 4. Frontend Development Mode (Hot-Reloading)
-If you are developing or modifying the React UI:
-```bash
-./run.sh --dev
-```
-* **Frontend Dev Server:** [http://localhost:3000](http://localhost:3000) (instant HMR updates)
-* **Backend API & Swagger Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 👥 Team Collaboration Reference
+## Running the Application
 
-For full project requirements, architectural specs, and data guides, refer to:
-* **[`docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md`](docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md)** — **(Team Action Guide)** Exact module assignments and which data files to use
-* **[`docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md`](docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md)** — **(Data Architecture)** Complete data pipeline, usage breakdown, and data inventory
-* **[`docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md`](docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md)** — Comprehensive technical specifications
-* **[`docs/TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md`](docs/TEAM_MEETING_AND_DELIVERABLES_ROADMAP.md)** — Team meeting pitch & 5-person roadmap
+### Production Mode (Single Process)
+Builds the frontend and serves both API and static assets from the FastAPI server:
+```bash
+./run.sh
+```
+- Web Application: [http://localhost:8000](http://localhost:8000)
+- API Documentation (Swagger): [http://localhost:8000/docs](http://localhost:8000/docs)
+
+### Development Mode (Hot-Reloading)
+Runs the FastAPI backend and Vite development server concurrently:
+```bash
+./run.sh --dev
+```
+- Frontend Dev Server: [http://localhost:3000](http://localhost:3000)
+- Backend API Server: [http://localhost:8000](http://localhost:8000)
+
+---
+
+## Testing
+
+Run the automated test suite:
+```bash
+python -m pytest tests/ -q
+```
+
+Validate the SFT dataset integrity:
+```bash
+python src/data_processing/validate_sft_dataset.py
+```
+
+---
+
+## Documentation
+
+- **Team Task & Data Guide:** [docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md](docs/TEAM_DATA_HANDOFF_AND_TASKS_GUIDE.md)
+- **Data Architecture & Usage Guide:** [docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md](docs/DATA_ARCHITECTURE_AND_USAGE_GUIDE.md)
+- **Technical Specification & Deliverables:** [docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md](docs/PROJECT_DELIVERABLES_AND_SPECIFICATION.md)
